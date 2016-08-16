@@ -36,8 +36,11 @@ else:
     DEVNULL = open(os.devnull, 'wb')
 
 # The default url
-url = "https://goo.gl/SkcDTN"
+url = "http://wolfspyre.com"
 
+packettype = 'eddy_url'
+
+#
 schemes = [
         "http://www.",
         "https://www.",
@@ -58,15 +61,21 @@ parser.add_argument('-s','--scan', action='store_true',
                     help='Scan for URLs.')
 parser.add_argument('-t','--terminate', action='store_true',
                     help='Stop advertising URL.')
+#parser.add_argument('-p','--packettype', type=str, default=packettype,
+#                    help='Packet Type to scan for Supported Values: "eddy_url", "eddy_tlm", "esti_a", "esti_b".')
 parser.add_argument('-o','--one', action='store_true',
-                    help='Scan one URL only.')
+                    help='Scan one packet only.')
 parser.add_argument("-v", "--version", action='store_true',
                     help='Version of ' + application_name + '.')
 parser.add_argument("-V", "--Verbose", action='store_true',
                     help='Print lots of debug output.')
+#parser.add_argument("-c", "--config_file", default='pybeacon.yaml', type=str,
+#                    help='config_file.')
 
 args = parser.parse_args()
 
+# TODO: add logger
+# TODO: add config file
 def verboseOutput(text = ""):
     if args.Verbose:
         sys.stderr.write(text + "\n")
@@ -231,6 +240,12 @@ def onPacketFound(packet):
             verboseOutput("Eddystone-UID")
         elif frameType == 0x20:
             verboseOutput("Eddystone-TLM")
+            tlmVersion = data[26]
+            tlmBatt = data[27:28]
+            tlmTemp = data[29:30]
+            tlmAdvCount = data[31:34]
+            tlmUptime = data[31:34]
+            verboseOutput("telem: V:{} B:{} T:{} A:{} U:{}".format(tlmVersion,tlmBatt,tlmTemp,tlmAdvCount,tlmUptime))
         else:
             verboseOutput("Unknown Eddystone frame type: {}".format(frameType))
 
@@ -259,7 +274,7 @@ def scan(duration = None):
     lescan = subprocess.Popen(
             ["sudo", "-n", "hcitool", "lescan", "--duplicates"],
             stdout = DEVNULL)
-    
+
     dump = subprocess.Popen(
             ["sudo", "-n", "hcidump", "--raw"],
             stdout = subprocess.PIPE)
@@ -324,7 +339,7 @@ def stopAdvertising():
 def showVersion():
     print(application_name + " " + version)
 
-def main():    
+def main():
     if args.version:
         showVersion()
     else:
