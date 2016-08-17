@@ -13,9 +13,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""
-Python script for scanning and advertising urls over Eddystone-URL.
-"""
+'''
+Python script for interacting with Bluetooth Beacons.
+Taken from
+'''
+
 import re
 import os
 import signal
@@ -23,12 +25,22 @@ import subprocess
 import sys
 import time
 import argparse
+import wpl_log
+import wpl_cfg_parser
+import logging
 from . import __version__
 from pprint import pprint
+import wpl_stats
+from wpl_cfg_parser import wpl_cfg
 
 application_name = 'PyBeacon'
 version = __version__ + 'beta'
 
+def init():
+    """Read config file"""
+    ret = {}
+    config = wpl_cfg()
+    return config
 
 if (sys.version_info > (3, 0)):
     DEVNULL = subprocess.DEVNULL
@@ -42,43 +54,42 @@ packettype = 'eddy_url'
 
 #
 schemes = [
-        "http://www.",
-        "https://www.",
-        "http://",
-        "https://",
-        ]
+    "http://www.",
+    "https://www.",
+    "http://",
+    "https://",
+    ]
 
 extensions = [
-        ".com/", ".org/", ".edu/", ".net/", ".info/", ".biz/", ".gov/",
-        ".com", ".org", ".edu", ".net", ".info", ".biz", ".gov",
-        ]
+    ".com/", ".org/", ".edu/", ".net/", ".info/", ".biz/", ".gov/",
+    ".com", ".org", ".edu", ".net", ".info", ".biz", ".gov",
+    ]
 
-parser = argparse.ArgumentParser(prog=application_name, description= __doc__)
+parser = argparse.ArgumentParser(prog=application_name, description=__doc__)
 
-parser.add_argument("-u", "--url", nargs='?', const=url, type=str,
-    default=url, help='URL to advertise.')
-parser.add_argument('-s','--scan', action='store_true',
-                    help='Scan for URLs.')
-parser.add_argument('-t','--terminate', action='store_true',
+parser.add_argument("-u", "--url", nargs='?', const=url, type=str, default=url,
+                    help='URL to advertise.')
+parser.add_argument('-s', '--scan', action='store_true', help='Scan for URLs.')
+parser.add_argument('-t', '--terminate', action='store_true',
                     help='Stop advertising URL.')
 #parser.add_argument('-p','--packettype', type=str, default=packettype,
 #                    help='Packet Type to scan for Supported Values: "eddy_url", "eddy_tlm", "esti_a", "esti_b".')
-parser.add_argument('-o','--one', action='store_true',
+parser.add_argument('-o', '--one', action='store_true',
                     help='Scan one packet only.')
 parser.add_argument("-v", "--version", action='store_true',
                     help='Version of ' + application_name + '.')
 parser.add_argument("-V", "--Verbose", action='store_true',
                     help='Print lots of debug output.')
-#parser.add_argument("-c", "--config_file", default='pybeacon.yaml', type=str,
-#                    help='config_file.')
+parser.add_argument("-c", "--config_file", default='config.yml', type=str,
+                    help='config_file.')
 
 args = parser.parse_args()
 
-# TODO: add logger
-# TODO: add config file
-def verboseOutput(text = ""):
-    if args.Verbose:
-        sys.stderr.write(text + "\n")
+
+# actual behavior
+# The local logger
+logger = logging.getLogger('GroveSense')
+
 
 
 def encodeurl(url):
@@ -116,7 +127,7 @@ def encodeMessage(url):
     encodedurl = encodeurl(url)
     encodedurlLength = len(encodedurl)
 
-    verboseOutput("Encoded url length: " + str(encodedurlLength))
+    logger.debug("Encoded url length: " + str(encodedurlLength))
 
     if encodedurlLength > 18:
         raise Exception("Encoded url too long (max 18 bytes)")
@@ -207,10 +218,7 @@ def onUrlFound(url):
     """
 
     url = resolveUrl(url)
-    sys.stdout.write(url)
-    sys.stdout.write("\n")
-    sys.stdout.flush()
-
+    logger.info(url)
 
 foundPackets = set()
 
@@ -234,32 +242,32 @@ def onPacketFound(packet):
 
         # Eddystone-URL
         if frameType == 0x10:
-            verboseOutput("Eddystone-URL")
-            onUrlFound(decodeUrl(data[27:22 + serviceDataLength]))
+            logger.debug('Eddystone-URL')
+            #onUrlFound(decodeUrl(data[27:22 + serviceDataLength]))
         elif frameType == 0x00:
-            verboseOutput("Eddystone-UID")
+            logger.debug('Eddystone-UID')
         elif frameType == 0x20:
-            verboseOutput("Eddystone-TLM")
+            #https://github.com/google/eddystone/blob/master/eddystone-tlm/tlm-plain.md
+            logger.debug('Eddystone-TLM')
             tlmVersion = data[26]
-            tlmBatt = data[27:28]
+            tlmBatt = format("{}.{}", data[27], data[28])
             tlmTemp = data[29:30]
             tlmAdvCount = data[31:34]
             tlmUptime = data[31:34]
-            verboseOutput("telem: V:{} B:{} T:{} A:{} U:{}".format(tlmVersion,tlmBatt,tlmTemp,tlmAdvCount,tlmUptime))
+            logger.info("telem: V:{} B:{} T:{} A:{} U:{}".format(tlmVersion,tlmBatt,tlmTemp,tlmAdvCount,tlmUptime))
         else:
-            verboseOutput("Unknown Eddystone frame type: {}".format(frameType))
+            logger.debug("Unknown Eddystone frame type: {}".format(frameType))
+
 
     # UriBeacon
     elif len(data) >= 20 and data[19] == 0xd8 and data[20] == 0xfe:
         serviceDataLength = data[21]
-        verboseOutput("UriBeacon")
+        logger.debug("UriBeacon")
         onUrlFound(decodeUrl(data[27:22 + serviceDataLength]))
 
     else:
-        verboseOutput("Unknown beacon type")
-
-    verboseOutput(packet)
-    verboseOutput()
+        logger.debug("Unknown beacon type")
+        #verboseOutput(packet)
 
 
 def scan(duration = None):
@@ -268,7 +276,7 @@ def scan(duration = None):
     is set to None, it scans until interrupted.
     """
 
-    print("Scanning...")
+    logger.info("Scanning...")
     subprocess.call("sudo hciconfig hci0 reset", shell = True, stdout = DEVNULL)
 
     lescan = subprocess.Popen(
@@ -304,7 +312,7 @@ def scan(duration = None):
 
 
 def advertise(url):
-    print("Advertising: " + url)
+    logger.info("Advertising: " + url)
     message = encodeMessage(url)
 
     # Prepend the length of the whole message
@@ -318,7 +326,7 @@ def advertise(url):
 
     # Concatenate all the hex strings, separated by spaces
     message = " ".join(message)
-    verboseOutput("Message: " + message)
+    logger.debug("Message: " + message)
 
     subprocess.call("sudo hciconfig hci0 up", shell = True, stdout = DEVNULL)
 
@@ -354,4 +362,10 @@ def main():
             advertise(args.url)
 
 if __name__ == "__main__":
+    conf = init()
+    if conf['Global']['debug']:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
+    logger.debug('Config: %r', conf)
     main()

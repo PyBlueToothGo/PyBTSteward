@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
 
-from .RPyBeacon import main
+from PyBeacon import main
 main()

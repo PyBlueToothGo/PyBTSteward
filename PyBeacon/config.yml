@@ -1,0 +1,22 @@
+Global:
+  debug: false
+  interval: 10
+
+Logging:
+  logfile: '/var/log/pybeacon.log'
+  loglevel: 'INFO'
+  mark: true
+  mark_count: 12
+
+Reporting:
+  statsd:
+    enabled: true
+    host:    '127.0.0.1'
+    port:    8125
+    prefix:  ''
+Beacons:
+  eddystone:
+    telemetry:
+      enabled: true
+      temp_enabled: true
+      native_unit: 'c'
