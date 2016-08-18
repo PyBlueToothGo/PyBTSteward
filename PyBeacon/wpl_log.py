@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7
+#!/usr/bin/env python3
 #
 # Logger specifications
 # Log in with a date format that matches our other systems
@@ -18,13 +18,13 @@ logging.Formatter.converter = time.localtime
 logging.Formatter.default_time_format = '%Y-%m-%dT%H:%M:%S'
 logging.Formatter.default_msec_format = '%s.%03dZ'
 
+loglevel=logging.INFO if conf['Global']['debug'] !=  True else logging.DEBUG
+
 logging.basicConfig(format='%(asctime)s <%(name)s> %(levelname)s: %(message)s'
                     .format(name=__name__, width=25, align='^'),
-                    level=logging.INFO,filename=conf['Logging']['logfile'])
+                    level=loglevel,filename=conf['Logging']['logfile'])
 logger = logging.getLogger(__name__)
-
-logger.setLevel(logging.INFO)
-
+logger.setLevel(loglevel)
 # Add some color to the loglevel
 logging.addLevelName(logging.DEBUG, "\033[34m%s\033[1;0m" %
                      logging.getLevelName(logging.DEBUG))
