@@ -1,6 +1,6 @@
 #logging
 #math
 pyyaml==3.11
-statsd==3.21
+statsd==3.2.1
 #subprocess
 #time

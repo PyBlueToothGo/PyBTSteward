@@ -18,19 +18,20 @@ Python script for interacting with Bluetooth Beacons.
 Taken from
 '''
 
-import re
+import argparse
+import logging
 import os
+import re
 import signal
+import struct
 import subprocess
 import sys
 import time
-import argparse
-import wpl_log
 import wpl_cfg_parser
-import logging
+import wpl_log
+import wpl_stats
 from . import __version__
 from pprint import pprint
-import wpl_stats
 from wpl_cfg_parser import wpl_cfg
 
 application_name = 'PyBeacon'
@@ -88,7 +89,7 @@ args = parser.parse_args()
 
 # actual behavior
 # The local logger
-logger = logging.getLogger('GroveSense')
+logger = logging.getLogger(application_name)
 
 
 
@@ -237,24 +238,44 @@ def onPacketFound(packet):
 
     # Eddystone
     if len(data) >= 20 and data[19] == 0xaa and data[20] == 0xfe:
+        first20 = struct.unpack_from('bb10c6cbb', data[0:21])
+        TxPwr = data[1]
         serviceDataLength = data[21]
+        nameSpace=struct.unpack_from('10c',data[2:11])
+        instance=struct.unpack_from('6c',data[12:17])
         frameType = data[25]
 
+        logger.info("first 20 bytes: {}".format(first20))
+        logger.info('serviceDataLength: {}'.format(data[21]))
+        logger.info('NameSpace: {}'.format(nameSpace))
+        logger.info('Instance: {}'.format(instance))
+        logger.info('Tx Power: {}'.format(TxPwr[0]))
+
         # Eddystone-URL
-        if frameType == 0x10:
+        if frameType == 0x00:
+            logger.debug('Eddystone-UID')
+        elif frameType == 0x10:
             logger.debug('Eddystone-URL')
             #onUrlFound(decodeUrl(data[27:22 + serviceDataLength]))
-        elif frameType == 0x00:
-            logger.debug('Eddystone-UID')
         elif frameType == 0x20:
             #https://github.com/google/eddystone/blob/master/eddystone-tlm/tlm-plain.md
+            #https://docs.python.org/3/library/struct.html
+            #https://forums.estimote.com/t/temperature-on-eddystone-tlm-without-estimote-sdk-android/2485
             logger.debug('Eddystone-TLM')
             tlmVersion = data[26]
-            tlmBatt = format("{}.{}", data[27], data[28])
-            tlmTemp = data[29:30]
-            tlmAdvCount = data[31:34]
-            tlmUptime = data[31:34]
-            logger.info("telem: V:{} B:{} T:{} A:{} U:{}".format(tlmVersion,tlmBatt,tlmTemp,tlmAdvCount,tlmUptime))
+            tlmBatt = struct.unpack_from('>H', data, offset=27)
+            _tempint = struct.unpack_from('b', data, offset=29)
+            _tempfract = struct.unpack_from('b', data, offset=30)
+            temp = (_tempint[0] + (_tempfract[0] / 256.0))
+            tlmAdvCount = struct.unpack_from('>l', data, offset=31)
+            tlmUptime = struct.unpack_from('>l',data, offset=35)
+
+#2016-08-18 04:00:55,367 <application_name> INFO: telem: V:0 B:(2979,) T:(7296, <-28.5c) A:(0,) U:(5880,)
+            #for c in data[00:19]:
+            #    first20 += str(c.decode())
+            logger.info("telem: V:{} B:{} T:{} A:{} U:{}".format(tlmVersion,tlmBatt[0],temp, tlmAdvCount[0],tlmUptime[0]))
+        elif frameType == 0x30:
+            logger.debug('Eddystone-EID')
         else:
             logger.debug("Unknown Eddystone frame type: {}".format(frameType))
 

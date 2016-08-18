@@ -19,4 +19,5 @@ Beacons:
     telemetry:
       enabled: true
       temp_enabled: true
-      native_unit: 'c'
+      native_temp_unit: 'c'
+  estimote:
