@@ -249,7 +249,7 @@ def onPacketFound(packet):
         logger.info('serviceDataLength: {}'.format(data[21]))
         logger.info('NameSpace: {}'.format(nameSpace))
         logger.info('Instance: {}'.format(instance))
-        logger.info('Tx Power: {}'.format(TxPwr[0]))
+        logger.info('Tx Power: {}'.format(TxPwr))
 
         # Eddystone-URL
         if frameType == 0x00:
