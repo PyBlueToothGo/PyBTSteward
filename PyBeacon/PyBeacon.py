@@ -241,8 +241,8 @@ def onPacketFound(packet):
         first20 = struct.unpack_from('bb10c6cbb', data[0:21])
         TxPwr = data[1]
         serviceDataLength = data[21]
-        nameSpace=struct.unpack_from('10c',data[2:11])
-        instance=struct.unpack_from('6c',data[12:17])
+        nameSpace=struct.unpack_from('10c',data, offset=2)
+        instance=struct.unpack_from('6c',data, offset=12)
         frameType = data[25]
 
         logger.info("first 20 bytes: {}".format(first20))
