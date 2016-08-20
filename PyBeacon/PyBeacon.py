@@ -398,7 +398,7 @@ def onPacketFound(packet):
         logger.info('Tx Power: {}'.format(TxPwr))
 
         # Eddystone-URL
-        decoded_packet = decode_eddystone(data[5:])
+        decoded_packet = decode_eddystone(data[3:])
 
 #        if frameType == 0x00:
 #            logger.debug('Eddystone-UID')
