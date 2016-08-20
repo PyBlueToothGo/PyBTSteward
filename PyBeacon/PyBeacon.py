@@ -375,7 +375,9 @@ def onPacketFound(packet):
     """
 
     data = bytearray.fromhex(packet)
-    barray = [packet[i:i+2] for i in range(0,len(packet), 2)]
+    barray = []
+    for c in packet:
+        barray += c
 
     logger.info('packet: {}'.format(packet))
     logger.info('data: {}'.format(data))
