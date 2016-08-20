@@ -11,7 +11,7 @@ Who doesn't like log.
 '''
 import logging
 import time
-from wpl_cfg_parser import wpl_cfg
+from PyBeacon.wpl_cfg_parser import wpl_cfg
 
 conf = wpl_cfg()
 logging.Formatter.converter = time.localtime

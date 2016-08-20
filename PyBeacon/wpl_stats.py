@@ -9,8 +9,8 @@ Interact with Statsd
 '''
 import logging
 import statsd
-import wpl_log
-from wpl_cfg_parser import wpl_cfg
+import PyBeacon.wpl_log
+from PyBeacon.wpl_cfg_parser import wpl_cfg
 from statsd import StatsClient
 
 logger = logging.getLogger(__name__)
