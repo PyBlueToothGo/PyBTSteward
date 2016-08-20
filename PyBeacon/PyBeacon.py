@@ -98,6 +98,24 @@ args = parser.parse_args()
 # The local logger
 logger = logging.getLogger(__name__)
 
+#http://code.activestate.com/recipes/510399-byte-to-hex-and-hex-to-byte-string-conversion/
+def HexToByte( hexStr ):
+    """
+    Convert a string hex byte values into a byte string. The Hex Byte values may
+    or may not be space separated.
+    """
+    # The list comprehension implementation is fractionally slower in this case
+    #
+    #    hexStr = ''.join( hexStr.split(" ") )
+    #    return ''.join( ["%c" % chr( int ( hexStr[i:i+2],16 ) ) \
+    #                                   for i in range(0, len( hexStr ), 2) ] )
+    bytez = []
+    hexStr = ''.join( hexStr.split(" ") )
+    for i in range(0, len(hexStr), 2):
+        bytez.append( chr( int (hexStr[i:i+2], 16 ) ) )
+    return ''.join( bytez )
+
+
 
 def decode_eddystone(ad_struct):
     """Ad structure decoder for Eddystone
@@ -379,11 +397,11 @@ def onPacketFound(packet):
     """
 
     data = bytearray.fromhex(packet)
-    barray = bytearray()
+    barray = bytearray(HexToByte(packet))
 #    foo = packet.split()
 #    barray.join('%02s'%s for s in foo)
-    for b in packet.split():
-        barray +='{}'.format(b)
+#    for b in packet.split():
+#        barray +='{}'.format(b)
 
     logger.info('packet: {}'.format(packet))
     logger.info('data: {}'.format(data))
