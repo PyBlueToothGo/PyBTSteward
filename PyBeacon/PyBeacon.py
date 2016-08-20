@@ -377,6 +377,9 @@ def onPacketFound(packet):
     data = bytearray.fromhex(packet)
     barray = bytearray(packet)
 
+    logger.info('packet: {}'.format(packet))
+    logger.info('data: {}'.format(data))
+    logger.info('barray: {}'.format(barray))
     if args.one:
         tmp = packet[:-3]
         if tmp in foundPackets:
