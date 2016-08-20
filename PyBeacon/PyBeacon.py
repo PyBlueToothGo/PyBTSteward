@@ -399,7 +399,7 @@ def onPacketFound(packet):
     data = bytearray.fromhex(packet)
     barray = bytearray()
     for bs in packet.split():
-        hb = HexToByte(bs)
+        hb = int(HexToByte(bs), 0)
         logger.info("bs: {} hb: {}".format(bs,hb))
         barray.append(hb)
 #    barray = bytearray.fromhex(HexToByte(packet))
