@@ -375,6 +375,7 @@ def onPacketFound(packet):
     """
 
     data = bytearray.fromhex(packet)
+    barray = bytearray(packet)
 
     if args.one:
         tmp = packet[:-3]
@@ -398,7 +399,7 @@ def onPacketFound(packet):
         logger.info('Tx Power: {}'.format(TxPwr))
 
         # Eddystone-URL
-        decoded_packet = decode_eddystone(packet)
+        decoded_packet = decode_eddystone(barray)
 
 #        if frameType == 0x00:
 #            logger.debug('Eddystone-UID')
