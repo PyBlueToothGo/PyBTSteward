@@ -383,14 +383,14 @@ def onPacketFound(packet):
 
     # Eddystone
     if len(data) >= 20 and data[19] == 0xaa and data[20] == 0xfe:
-        first20 = struct.unpack_from('ii10c6cbb', data[0:21])
+#        first20 = struct.unpack_from('>ii10c6cbb', data,)
         TxPwr = data[1]
         serviceDataLength = data[21]
         nameSpace=struct.unpack_from('10s',data, offset=2)
         instance=struct.unpack_from('6s',data, offset=12)
         frameType = data[25]
 
-        logger.info("first 20 bytes: {}".format(first20))
+#        logger.info("first 20 bytes: {}".format(first20))
         logger.info('serviceDataLength: {}'.format(data[21]))
         logger.info('NameSpace: {}'.format(nameSpace))
         logger.info('Instance: {}'.format(instance))
