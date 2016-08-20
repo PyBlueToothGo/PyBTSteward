@@ -375,7 +375,7 @@ def onPacketFound(packet):
     """
 
     data = bytearray.fromhex(packet)
-    barray = bytearray(packet)
+    barray = struct.unpack("B",packet)
 
     logger.info('packet: {}'.format(packet))
     logger.info('data: {}'.format(data))
