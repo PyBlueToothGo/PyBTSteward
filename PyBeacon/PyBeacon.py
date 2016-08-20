@@ -49,7 +49,7 @@ def init():
     config = wpl_cfg()
     return config
 
-if (sys.version_info > (3, 0)):
+if sys.version_info > (3, 0):
     DEVNULL = subprocess.DEVNULL
 else:
     DEVNULL = open(os.devnull, 'wb')
@@ -80,7 +80,8 @@ parser.add_argument('-s', '--scan', action='store_true', help='Scan for URLs.')
 parser.add_argument('-t', '--terminate', action='store_true',
                     help='Stop advertising URL.')
 #parser.add_argument('-p','--packettype', type=str, default=packettype,
-#                    help='Packet Type to scan for Supported Values: "eddy_url", "eddy_tlm", "esti_a", "esti_b".')
+#                    help='Packet Type to scan for Supported Values: "eddy_url",
+#                     "eddy_tlm", "esti_a", "esti_b".')
 parser.add_argument('-o', '--one', action='store_true',
                     help='Scan one packet only.')
 parser.add_argument("-v", "--version", action='store_true',
@@ -99,7 +100,7 @@ logger = logging.getLogger(__name__)
 
 
 def decode_eddystone(ad_struct):
-  """Ad structure decoder for Eddystone
+    """Ad structure decoder for Eddystone
   Returns a dictionary with the following fields if the ad structure is a
   valid mfg spec Eddystone structure:
     adstruct_bytes: <int> Number of bytes this ad structure consumed
@@ -124,118 +125,121 @@ def decode_eddystone(ad_struct):
   fields:
     adstruct_bytes: <int> Number of bytes this ad structure consumed
     type: None for unknown
-  """
-  # Get the length of the ad structure (including the length byte)
-  adstruct_bytes = ord(ad_struct[0]) + 1
-  # Create the return object
-  ret = { 'adstruct_bytes': adstruct_bytes, 'type': None }
-  # Is our data long enough to decode as Eddystone?
-  if adstruct_bytes >= 5 and adstruct_bytes <= len(ad_struct):
-    # Decode the common part of the Eddystone data
-    EddystoneCommon = namedtuple('EddystoneCommon', 'adstruct_bytes '
-                    + 'service_data eddystone_uuid sub_type')
-    ec = EddystoneCommon._make(struct.unpack('<BBHB', ad_struct[:5]))
-    # Is this a valid Eddystone ad structure?
-    if ec.eddystone_uuid == 0xFEAA and ec.service_data == 0x16:
-      # Fill in the return data we know at this point
-      ret['type'] = 'eddystone'
-      # Now select based on the sub type
-      # Is this a UID sub type? (Accomodate beacons that either include or
-      # exclude the reserved bytes)
-      if ec.sub_type == 0x00 and (ec.adstruct_bytes == 0x15 or
-                                  ec.adstruct_bytes == 0x17):
-        # Decode Eddystone UID data (without reserved bytes)
-        EddystoneUID = namedtuple('EddystoneUID', 'rssi_ref '
-                      + 'namespace instance')
-        ei = EddystoneUID._make(struct.unpack('>b10s6s', ad_struct[5:22]))
-        # Fill in the return structure with the data we extracted
-        ret['sub_type'] = 'uid'
-        ret['namespace'] = ''.join('%02x' % ord(c) for c in ei.namespace)
-        ret['instance'] = ''.join('%02x' % ord(c) for c in ei.instance)
-        ret['rssi_ref'] = ei.rssi_ref - 41
-      # Is this a URL sub type?
-      if ec.sub_type == 0x10:
-        # Decode Eddystone URL header
-        EddyStoneURL = namedtuple('EddystoneURL', 'rssi_ref url_scheme')
-        eu = EddyStoneURL._make(struct.unpack('>bB', ad_struct[5:7]))
-        # Fill in the return structure with extracted data and init the URL
-        ret['sub_type'] = 'url'
-        ret['rssi_ref'] = eu.rssi_ref - 41
-        ret['url'] = ['http://www.', 'https://www.', 'http://', 'https://'] \
+    """
+    # Get the length of the ad structure (including the length byte)
+    adstruct_bytes = ord(ad_struct[0]) + 1
+    # Create the return object
+    ret = {'adstruct_bytes': adstruct_bytes, 'type': None}
+    # Is our data long enough to decode as Eddystone?
+
+    EddystoneCommon = namedtuple('EddystoneCommon', 'adstruct_bytes' +
+                                 'service_data', 'eddystone_uuid', 'sub_type')
+    if adstruct_bytes >= 5 and adstruct_bytes <= len(ad_struct):
+        # Decode the common part of the Eddystone data
+        ec = EddystoneCommon._make(struct.unpack('<BBHB', ad_struct[:5]))
+        # Is this a valid Eddystone ad structure?
+        if ec.eddystone_uuid == 0xFEAA and ec.service_data == 0x16:
+            # Fill in the return data we know at this point
+            ret['type'] = 'eddystone'
+            # Now select based on the sub type
+            # Is this a UID sub type? (Accomodate beacons that either include or
+            # exclude the reserved bytes)
+            if ec.sub_type == 0x00 and (ec.adstruct_bytes == 0x15 or
+                                        ec.adstruct_bytes == 0x17):
+                # Decode Eddystone UID data (without reserved bytes)
+                EddystoneUID = namedtuple('EddystoneUID', 'rssi_ref' +
+                                          'namespace', 'instance')
+                ei = EddystoneUID._make(struct.unpack('>b10s6s', ad_struct[5:22]))
+                # Fill in the return structure with the data we extracted
+                ret['sub_type'] = 'uid'
+                ret['namespace'] = ''.join('%02x' % ord(c) for c in ei.namespace)
+                ret['instance'] = ''.join('%02x' % ord(c) for c in ei.instance)
+                ret['rssi_ref'] = ei.rssi_ref - 41
+            # Is this a URL sub type?
+            if ec.sub_type == 0x10:
+                # Decode Eddystone URL header
+                EddyStoneURL = namedtuple('EddystoneURL', 'rssi_ref', 'url_scheme')
+                eu = EddyStoneURL._make(struct.unpack('>bB', ad_struct[5:7]))
+                # Fill in the return structure with extracted data and init the URL
+                ret['sub_type'] = 'url'
+                ret['rssi_ref'] = eu.rssi_ref - 41
+                ret['url'] = ['http://www.', 'https://www.', 'http://', 'https://'] \
                       [eu.url_scheme & 0x03]
-        # Go through the remaining bytes to build the URL
-        for c in ad_struct[7:adstruct_bytes]:
-          # Get the character code
-          c_code = ord(c)
-          # Is this an expansion code?
-          if c_code < 14:
-            # Add the expansion code
-            ret['url'] += ['.com', '.org', '.edu', '.net', '.info', '.biz',
-                          '.gov'][c_code if c_code < 7 else c_code - 7]
-            # Add the slash if that variant is selected
-            if c_code < 7: ret['url'] += '/'
-          # Is this a graphic printable ASCII character?
-          if c_code > 0x20 and c_code < 0x7F:
-            # Add it to the URL
-            ret['url'] += c
-      # Is this a TLM sub type?
-      if ec.sub_type == 0x20 and ec.adstruct_bytes == 0x11:
-        # Decode Eddystone telemetry data
-        EddystoneTLM = namedtuple('EddystoneTLM', 'tlm_version '
-                      + 'vbatt temp adv_cnt sec_cnt')
-        et = EddystoneTLM._make(struct.unpack('>BHhLL', ad_struct[5:18]))
-        # Fill in generic TLM data
-        ret['sub_type'] = 'tlm'
-        ret['tlm_version'] = et.tlm_version
-        # Fill the return structure with data if version 0
-        if et.tlm_version == 0x00:
-          ret['vbatt'] = et.vbatt / 1000.0
-          ret['temp'] = et.temp / 256.0
-          ret['adv_cnt'] = et.adv_cnt
-          ret['sec_cnt'] = et.sec_cnt / 10.0
-  # Return the object
-  return ret
+                # Go through the remaining bytes to build the URL
+                for c in ad_struct[7:adstruct_bytes]:
+                    # Get the character code
+                    c_code = ord(c)
+                    # Is this an expansion code?
+                    if c_code < 14:
+                        # Add the expansion code
+                        ret['url'] += ['.com', '.org', '.edu', '.net', '.info', '.biz',
+                                       '.gov'][c_code if c_code < 7 else c_code - 7]
+                        # Add the slash if that variant is selected
+                        if c_code < 7: ret['url'] += '/'
+                    # Is this a graphic printable ASCII character?
+                    if c_code > 0x20 and c_code < 0x7F:
+                        # Add it to the URL
+                        ret['url'] += c
+            # Is this a TLM sub type?
+            if ec.sub_type == 0x20 and ec.adstruct_bytes == 0x11:
+                # Decode Eddystone telemetry data
+                EddystoneTLM = namedtuple('EddystoneTLM', 'tlm_version' +
+                                          'vbatt', 'temp', 'adv_cnt', 'sec_cnt')
+                #'EddystoneTLM','tlm_version','vbatt', 'temp', 'adv_cnt', 'sec_cnt')
+                et = EddystoneTLM._make(struct.unpack('>BHhLL', ad_struct[5:18]))
+                # Fill in generic TLM data
+                ret['sub_type'] = 'tlm'
+                ret['tlm_version'] = et.tlm_version
+                # Fill the return structure with data if version 0
+                if et.tlm_version == 0x00:
+                    ret['vbatt'] = et.vbatt / 1000.0
+                    ret['temp'] = et.temp / 256.0
+                    ret['adv_cnt'] = et.adv_cnt
+                    ret['sec_cnt'] = et.sec_cnt / 10.0
+    # Return the object
+    return ret
 
 
 def decode_ibeacon(ad_struct):
-  """Ad structure decoder for iBeacon
-  Returns a dictionary with the following fields if the ad structure is a
-  valid mfg spec iBeacon structure:
+    """Ad structure decoder for iBeacon
+    Returns a dictionary with the following fields if the ad structure is a
+    valid mfg spec iBeacon structure:
     adstruct_bytes: <int> Number of bytes this ad structure consumed
     type: <string> 'ibeacon' for Apple iBeacon
     uuid: <string> UUID
     major: <int> iBeacon Major
     minor: <int> iBeacon Minor
     rssi_ref: <int> Reference signal @ 1m in dBm
-  If this isn't a valid iBeacon structure, it returns a dict with these
-  fields:
+    If this isn't a valid iBeacon structure, it returns a dict with these
+    fields:
     adstruct_bytes: <int> Number of bytes this ad structure consumed
     type: None for unknown
-  """
-  # Get the length of the ad structure (including the length byte)
-  adstruct_bytes = ord(ad_struct[0]) + 1
-  # Create the return object
-  ret = { 'adstruct_bytes': adstruct_bytes, 'type': None }
-  # Is the length correct and is our data long enough?
-  if adstruct_bytes == 0x1B and adstruct_bytes <= len(ad_struct):
-    # Decode the ad structure assuming iBeacon format
-    iBeaconData = namedtuple('iBeaconData', 'adstruct_bytes adstruct_type '
-                  + 'mfg_id_low mfg_id_high ibeacon_id ibeacon_data_len '
-                  + 'uuid major minor rssi_ref')
-    bd = iBeaconData._make(struct.unpack('>BBBBBB16sHHb', ad_struct[:27]))
-    # Check whether all iBeacon specific values are correct
-    if bd.adstruct_bytes == 0x1A and bd.adstruct_type == 0xFF and \
-        bd.mfg_id_low == 0x4C and bd.mfg_id_high == 0x00 and \
-        bd.ibeacon_id == 0x02 and bd.ibeacon_data_len == 0x15:
-      # This is a valid iBeacon ad structure
-      # Fill in the return structure with the data we extracted
-      ret['type'] = 'ibeacon'
-      ret['uuid'] = str(uuid.UUID(bytes=bd.uuid))
-      ret['major'] = bd.major
-      ret['minor'] = bd.minor
-      ret['rssi_ref'] = bd.rssi_ref
-  # Return the object
-  return ret
+    """
+    # Get the length of the ad structure (including the length byte)
+    adstruct_bytes = ord(ad_struct[0]) + 1
+    # Create the return object
+    ret = {'adstruct_bytes': adstruct_bytes, 'type': None}
+    # Is the length correct and is our data long enough?
+    if adstruct_bytes == 0x1B and adstruct_bytes <= len(ad_struct):
+      # Decode the ad structure assuming iBeacon format
+        iBeaconData = namedtuple('iBeaconData', 'adstruct_bytes', 'adstruct_type' \
+                                 + 'mfg_id_low', 'mfg_id_high', 'ibeacon_id' \
+                                 + 'ibeacon_data_len ', 'uuid', 'major' \
+                                 + 'minor', 'rssi_ref')
+        bd = iBeaconData._make(struct.unpack('>BBBBBB16sHHb', ad_struct[:27]))
+        # Check whether all iBeacon specific values are correct
+        if bd.adstruct_bytes == 0x1A and bd.adstruct_type == 0xFF and \
+            bd.mfg_id_low == 0x4C and bd.mfg_id_high == 0x00 and \
+            bd.ibeacon_id == 0x02 and bd.ibeacon_data_len == 0x15:
+            # This is a valid iBeacon ad structure
+            # Fill in the return structure with the data we extracted
+            ret['type'] = 'ibeacon'
+            ret['uuid'] = str(uuid.UUID(bytes=bd.uuid))
+            ret['major'] = bd.major
+            ret['minor'] = bd.minor
+            ret['rssi_ref'] = bd.rssi_ref
+        # Return the object
+    return ret
 
 
 
@@ -280,23 +284,23 @@ def encodeMessage(url):
         raise Exception("Encoded url too long (max 18 bytes)")
 
     message = [
-            0x02,   # Flags length
-            0x01,   # Flags data type value
-            0x1a,   # Flags data
+        0x02,   # Flags length
+        0x01,   # Flags data type value
+        0x1a,   # Flags data
 
-            0x03,   # Service UUID length
-            0x03,   # Service UUID data type value
-            0xaa,   # 16-bit Eddystone UUID
-            0xfe,   # 16-bit Eddystone UUID
+        0x03,   # Service UUID length
+        0x03,   # Service UUID data type value
 
-            5 + len(encodedurl), # Service Data length
-            0x16,   # Service Data data type value
-            0xaa,   # 16-bit Eddystone UUID
-            0xfe,   # 16-bit Eddystone UUID
+        0xaa,   # 16-bit Eddystone UUID
+        0xfe,   # 16-bit Eddystone UUID
 
-            0x10,   # Eddystone-url frame type
-            0xed,   # txpower
-            ]
+        5 + len(encodedurl), # Service Data length
+        0x16,   # Service Data data type value
+        0xaa,   # 16-bit Eddystone UUID
+        0xfe,   # 16-bit Eddystone UUID
+        0x10,   # Eddystone-url frame type
+        0xed,   # txpower
+        ]
 
     message += encodedurl
 
@@ -323,7 +327,7 @@ def resolveUrl(url):
     """
 
     try:
-        if (sys.version_info > (3, 0)):
+        if sys.version_info > (3, 0):
             import http.client
             import urllib.parse
 
@@ -351,9 +355,9 @@ def resolveUrl(url):
             response = h.getresponse()
 
         if response.status >= 300 and response.status < 400:
-                return resolveUrl(response.getheader("Location"))
+            return resolveUrl(response.getheader("Location"))
         else:
-                return url
+            return url
 
     except:
         return url
@@ -375,8 +379,9 @@ def onPacketFound(packet):
     """
 
     data = bytearray.fromhex(packet)
-    barray = bytearray(packet.split())
-#    barray.join('%02x'%i for i in packet)
+    barray = bytearray()
+    foo = packet.split()
+    barray.join('%02s'%s for s in foo)
 
     logger.info('packet: {}'.format(packet))
     logger.info('data: {}'.format(data))
@@ -413,9 +418,9 @@ def onPacketFound(packet):
 #            logger.debug('Eddystone-URL')
 #            #onUrlFound(decodeUrl(data[27:22 + serviceDataLength]))
 #        elif frameType == 0x20:
-#            #https://github.com/google/eddystone/blob/master/eddystone-tlm/tlm-plain.md
-#            #https://docs.python.org/3/library/struct.html
-#            #https://forums.estimote.com/t/temperature-on-eddystone-tlm-without-estimote-sdk-android/2485
+#https://github.com/google/eddystone/blob/master/eddystone-tlm/tlm-plain.md
+#https://docs.python.org/3/library/struct.html
+#https://forums.estimote.com/t/temperature-on-eddystone-tlm-without-estimote-sdk-android/2485
 #            logger.debug('Eddystone-TLM')
 #            tlmVersion = data[26]
 #            tlmBatt = struct.unpack_from('>H', data, offset=27)
@@ -424,7 +429,9 @@ def onPacketFound(packet):
 #            temp = (_tempint[0] + (_tempfract[0] / 256.0))
 #            tlmAdvCount = struct.unpack_from('>l', data, offset=31)
 #            tlmUptime = struct.unpack_from('>l',data, offset=35)
-#            logger.info("telem: V:{} B:{} T:{} A:{} U:{}".format(tlmVersion,tlmBatt[0],temp, tlmAdvCount[0],tlmUptime[0]))
+#            logger.info("telem: V:{} B:{} T:{} A:{}" \
+#                        + " U:{}".format(tlmVersion,tlmBatt[0],temp \
+#                        +  tlmAdvCount[0],tlmUptime[0]))
 #        elif frameType == 0x30:
 #            logger.debug('Eddystone-EID')
 #        else:
@@ -443,22 +450,20 @@ def onPacketFound(packet):
         #verboseOutput(packet)
 
 
-def scan(duration = None):
+def scan(duration=None):
     """
     Scan for beacons. This function scans for [duration] seconds. If duration
     is set to None, it scans until interrupted.
     """
 
     logger.info("Scanning...")
-    subprocess.call("sudo hciconfig hci0 reset", shell = True, stdout = DEVNULL)
+    subprocess.call("sudo hciconfig hci0 reset", shell=True, stdout=DEVNULL)
 
     lescan = subprocess.Popen(
-            ["sudo", "-n", "hcitool", "lescan", "--duplicates"],
-            stdout = DEVNULL)
+        ["sudo", "-n", "hcitool", "lescan", "--duplicates"], stdout=DEVNULL)
 
     dump = subprocess.Popen(
-            ["sudo", "-n", "hcidump", "--raw"],
-            stdout = subprocess.PIPE)
+        ["sudo", "-n", "hcidump", "--raw"], stdout=subprocess.PIPE)
 
     packet = None
     try:
@@ -501,21 +506,21 @@ def advertise(url):
     message = " ".join(message)
     logger.debug("Message: " + message)
 
-    subprocess.call("sudo hciconfig hci0 up", shell = True, stdout = DEVNULL)
+    subprocess.call("sudo hciconfig hci0 up", shell=True, stdout=DEVNULL)
 
     # Stop advertising
-    subprocess.call("sudo hcitool -i hci0 cmd 0x08 0x000a 00", shell = True, stdout = DEVNULL)
+    subprocess.call("sudo hcitool -i hci0 cmd 0x08 0x000a 00", shell=True, stdout=DEVNULL)
 
     # Set message
-    subprocess.call("sudo hcitool -i hci0 cmd 0x08 0x0008 " + message, shell = True, stdout = DEVNULL)
+    subprocess.call("sudo hcitool -i hci0 cmd 0x08 0x0008 " + message, shell=True, stdout=DEVNULL)
 
     # Resume advertising
-    subprocess.call("sudo hcitool -i hci0 cmd 0x08 0x000a 01", shell = True, stdout = DEVNULL)
+    subprocess.call("sudo hcitool -i hci0 cmd 0x08 0x000a 01", shell=True, stdout=DEVNULL)
 
 
 def stopAdvertising():
     logger.info('Stopping advertising')
-    subprocess.call("sudo hcitool -i hci0 cmd 0x08 0x000a 00", shell = True, stdout = DEVNULL)
+    subprocess.call("sudo hcitool -i hci0 cmd 0x08 0x000a 00", shell=True, stdout=DEVNULL)
 
 def showVersion():
     print(application_name + " " + version)
