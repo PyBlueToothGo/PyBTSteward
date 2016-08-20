@@ -30,14 +30,14 @@ import struct
 import subprocess
 import sys
 import time
-import wpl_cfg_parser
-import wpl_log
-import wpl_stats
+import PyBeacon.wpl_cfg_parser
+import PyBeacon.wpl_log
+import PyBeacon.wpl_stats
 from collections import namedtuple
 import uuid
 from . import __version__
 from pprint import pprint
-from wpl_cfg_parser import wpl_cfg
+from PyBeacon.wpl_cfg_parser import wpl_cfg
 
 application_name = 'PyBeacon'
 version = __version__ + 'beta'
