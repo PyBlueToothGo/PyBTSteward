@@ -375,8 +375,8 @@ def onPacketFound(packet):
     """
 
     data = bytearray.fromhex(packet)
-    barray = bytearray()
-    barray.join('%02x'%i for i in packet)
+    barray = bytearray(packet.split())
+#    barray.join('%02x'%i for i in packet)
 
     logger.info('packet: {}'.format(packet))
     logger.info('data: {}'.format(data))
