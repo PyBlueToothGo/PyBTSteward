@@ -398,7 +398,7 @@ def onPacketFound(packet):
         logger.info('Tx Power: {}'.format(TxPwr))
 
         # Eddystone-URL
-        decoded_packet = decode_eddystone(data[3:])
+        decoded_packet = decode_eddystone(packet)
 
 #        if frameType == 0x00:
 #            logger.debug('Eddystone-UID')
@@ -507,7 +507,7 @@ def advertise(url):
 
 
 def stopAdvertising():
-    print("Stopping advertising")
+    logger.info('Stopping advertising')
     subprocess.call("sudo hcitool -i hci0 cmd 0x08 0x000a 00", shell = True, stdout = DEVNULL)
 
 def showVersion():
