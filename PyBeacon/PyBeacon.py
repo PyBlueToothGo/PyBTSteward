@@ -383,11 +383,11 @@ def onPacketFound(packet):
 #    foo = packet.split()
 #    barray.join('%02s'%s for s in foo)
     for b in packet.split():
-        barray +='{0:x}'.format(b)
+        barray +='{}'.format(b)
 
-    logger.info('packet: {x}'.format(packet))
-    logger.info('data: {x}'.format(data))
-    logger.info('barray: {x}'.format(barray))
+    logger.info('packet: {}'.format(packet))
+    logger.info('data: {}'.format(data))
+    logger.info('barray: {}'.format(barray))
     if args.one:
         tmp = packet[:-3]
         if tmp in foundPackets:
