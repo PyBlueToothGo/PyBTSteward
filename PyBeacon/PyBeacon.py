@@ -397,7 +397,7 @@ def onPacketFound(packet):
     """
 
     data = bytearray.fromhex(packet)
-    barray = HexToByte(packet)
+    barray = bytearray.fromhex(HexToByte(packet))
 #    barray = bytearray()
 #    barray.append(HexToByte(packet))
 #    foo = packet.split()
