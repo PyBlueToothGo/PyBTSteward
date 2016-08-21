@@ -47,9 +47,9 @@ def decode_eddystone(ad_struct):
     """
     # Get the length of the ad structure (including the length byte)
     try:
-        length = int(ad_struct[2]) + 1
+        length = int(ad_struct[0]) + 1
     except ValueError:
-        length = ord(ad_struct[2]) + 1
+        length = ord(ad_struct[0]) + 1
     #adstruct_bytes = ord(ad_struct[0]) + 1
     logger.info('Length from byte[2]: {}'.format(length))
     logger.info('Length of ad_struct: {}'.format(len(ad_struct)))
@@ -60,18 +60,20 @@ def decode_eddystone(ad_struct):
 
     EddystoneCommon = namedtuple('EddystoneCommon', 'adstruct_bytes service_data eddystone_uuid sub_type')
     if adstruct_bytes >= 5 and adstruct_bytes <= len(ad_struct):
+        logger.info('prepping EddystoneCommon tuple')
         # Decode the common part of the Eddystone data
         try:
             ec = EddystoneCommon._make(struct.unpack('<BBHB', ad_struct[0:5]))
         except TypeError:
             #if we passed this as a bytestring, handle differently
             # TODO: do this
-            logger.info('packing packet for depaction: {}'.format(ad_struct[0:5]))
+            logger.info('repacking packet for depaction into tuple: {}'.format(ad_struct[0:5]))
             ec = EddystoneCommon._make(struct.pack('<BBHB', ad_struct[0:5].each()))
 
 
-
+        logger.info('uuid: ')
         # Is this a valid Eddystone ad structure?
+
         if ec.eddystone_uuid == 0xFEAA and ec.service_data == 0x16:
             # Fill in the return data we know at this point
             ret['type'] = 'eddystone'
