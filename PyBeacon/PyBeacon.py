@@ -115,6 +115,19 @@ def HexToByte(hexStr):
     for i in range(0, len(hexStr), 2):
         bytez.append(chr(int(hexStr[i:i+2], 16)))
     return ''.join(bytez)
+def ByteToHex(byteStr):
+    """
+    Convert a byte string to it's hex string representation e.g. for output.
+    """
+
+    # Uses list comprehension which is a fractionally faster implementation than
+    # the alternative, more readable, implementation below
+    #
+    #    hex = []
+    #    for aChar in byteStr:
+    #        hex.append( "%02X " % ord( aChar ) )
+    #    return ''.join( hex ).strip()
+    return ''.join(["%02X"%ord(x) for x in byteStr]).strip()
 
 def decode_ibeacon(ad_struct):
     """Ad structure decoder for iBeacon
@@ -322,7 +335,7 @@ def onPacketFound(packet):
         device_addr_type = data[6]
         if device_addr_type == 1:
             logger.info('collecting mac addr from bytes 7-12')
-            device_addr = '{}:{}:{}:{}:{}:{}'.format(data[12],data[11],data[10],data[9],data[8],data[7])
+            device_addr = '{}:{}:{}:{}:{}:{}'.format(ByteToHex(data[12]),ByteToHex(data[11]),data[10],data[9],data[8],data[7])
             serviceDataLength = data[21]
 #        nameSpace=struct.unpack_from('10s',data, offset=2)
 #        instance=struct.unpack_from('6s',data, offset=12)
