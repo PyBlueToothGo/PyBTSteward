@@ -331,6 +331,7 @@ def onPacketFound(packet):
 #        logger.info('Instance: {}'.format(instance))
         logger.info('            Event: {}'.format(data[1]))
 
+
         # Eddystone-URL
         decoded_packet = decode_eddystone(barray[2:])
 
