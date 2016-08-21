@@ -106,12 +106,15 @@ def decode_eddystone(ad_struct):
                 # Fill in the return structure with the data we extracted
                 logger.info('EddyStone UID: {}'.format(ei))
                 try:
-                    ret['namespace'] = ''.join('%02X' % ord(c) for c in ei.namespace)
-                except TypeError:
-                    logger.info('interpolating namespace directly from hex')
                     ret['namespace'] = ''.join('{:02X}'.format(i) for i in ei.namespace)
-                logger.info('Namespace: {}'.format(ret['namespace']))
-                ret['instance'] = ''.join('%02X' % ord(c) for c in ei.instance)
+                except TypeError:
+                    logger.debug('interpolating Eddystone UID namespace from string')
+                    ret['namespace'] = ''.join('%02X' % ord(c) for c in ei.namespace)
+                try:
+                    ret['instance'] = ''.join('{:02X}'.format(i) for i in ei.instance)
+                except TypeError:
+                    logger.debug('interpolating Eddystone UID instance from string')
+                    ret['instance'] = ''.join('%02X' % ord(c) for c in ei.instance)
                 ret['rssi_ref'] = ei.rssi_ref - 41
             # Is this a URL sub type?
             if ec.sub_type == 0x10:
