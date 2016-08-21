@@ -349,7 +349,7 @@ def onPacketFound(packet):
 #        logger.info('Instance: {}'.format(instance))
             logger.info('            Event: {}'.format(data[1]))
             # Eddystone-URL
-            decoded_packet = decode_eddystone(barray[13:])
+            decoded_packet = decode_eddystone(barray[17:])
             logger.info("Decoded [{}]: {}".format(device_addr, decoded_packet))
         else:
             logger.info('Unknown Device address Type: {} (byte[6])'.format(data[6]))
