@@ -51,7 +51,8 @@ def decode_eddystone(ad_struct):
     except ValueError:
         length = ord(ad_struct[2]) + 1
     #adstruct_bytes = ord(ad_struct[0]) + 1
-    logger.info('calculated length: {}'.format(length))
+    logger.info('Length from byte[2]: {}'.format(length))
+    logger.info('Length of ad_struct: {}'.format(len(ad_struct)))
     adstruct_bytes = length
     # Create the return object
     ret = {'adstruct_bytes': adstruct_bytes, 'type': None}
