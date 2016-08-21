@@ -105,8 +105,13 @@ def decode_eddystone(ad_struct):
                 ei = EddystoneUID._make(struct.unpack('>b10s6s', ad_struct[13:30]))
                 # Fill in the return structure with the data we extracted
                 logger.info('EddyStone UID: {}'.format(ei))
-                ret['namespace'] = ''.join('%02x' % ord(c) for c in ei.namespace)
-                ret['instance'] = ''.join('%02x' % ord(c) for c in ei.instance)
+                try:
+                    ret['namespace'] = ''.join('%02X' % ord(c) for c in ei.namespace)
+                except TypeError:
+                    logger.info('interpolating namespace directly from hex')
+                    ret['namespace'] = ''.join('{:02X}'.format(i) for i in ei.namespace)
+                logger.info('Namespace: {}'.format(ret['namespace']))
+                ret['instance'] = ''.join('%02X' % ord(c) for c in ei.instance)
                 ret['rssi_ref'] = ei.rssi_ref - 41
             # Is this a URL sub type?
             if ec.sub_type == 0x10:
@@ -134,7 +139,7 @@ def decode_eddystone(ad_struct):
                         # Add it to the URL
                         ret['url'] += c
             # Is this a TLM sub type?
-            if ec.sub_type == 0x20 and ec.adstruct_bytes == 0x11:
+            if ec.sub_type == 0x20 and ec.eddy_len == 0x11:
                 # Decode Eddystone telemetry data
                 EddystoneTLM = namedtuple('EddystoneTLM', 'tlm_version vbatt temp adv_cnt sec_cnt')
                 #'EddystoneTLM','tlm_version','vbatt', 'temp', 'adv_cnt', 'sec_cnt')
