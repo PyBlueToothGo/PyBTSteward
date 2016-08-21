@@ -99,7 +99,7 @@ args = parser.parse_args()
 logger = logging.getLogger(__name__)
 
 #http://code.activestate.com/recipes/510399-byte-to-hex-and-hex-to-byte-string-conversion/
-def HexToByte( hexStr ):
+def HexToByte(hexStr):
     """
     Convert a string hex byte values into a byte string. The Hex Byte values may
     or may not be space separated.
@@ -110,10 +110,10 @@ def HexToByte( hexStr ):
     #    return ''.join( ["%c" % chr( int ( hexStr[i:i+2],16 ) ) \
     #                                   for i in range(0, len( hexStr ), 2) ] )
     bytez = []
-    hexStr = ''.join( hexStr.split(" ") )
+    hexStr = ''.join(hexStr.split(" "))
     for i in range(0, len(hexStr), 2):
-        bytez.append( chr( int (hexStr[i:i+2], 16 ) ) )
-    return ''.join( bytez )
+        bytez.append(chr(int(hexStr[i:i+2], 16)))
+    return ''.join(bytez)
 
 
 
@@ -145,16 +145,30 @@ def decode_eddystone(ad_struct):
     type: None for unknown
     """
     # Get the length of the ad structure (including the length byte)
-    adstruct_bytes = ord(ad_struct[0]) + 1
+    try:
+        length = int(ad_struct[2]) + 1
+    except ValueError:
+        length = ord(ad_struct[2]) + 1
+    #adstruct_bytes = ord(ad_struct[0]) + 1
+    logger.info('calculated length: {}'.format(length))
+    adstruct_bytes = length
     # Create the return object
     ret = {'adstruct_bytes': adstruct_bytes, 'type': None}
     # Is our data long enough to decode as Eddystone?
 
-    EddystoneCommon = namedtuple('EddystoneCommon', 'adstruct_bytes' +
-                                 'service_data', 'eddystone_uuid', 'sub_type')
+    EddystoneCommon = namedtuple('EddystoneCommon', 'adstruct_bytes service_data eddystone_uuid sub_type')
     if adstruct_bytes >= 5 and adstruct_bytes <= len(ad_struct):
         # Decode the common part of the Eddystone data
-        ec = EddystoneCommon._make(struct.unpack('<BBHB', ad_struct[:5]))
+        try:
+            ec = EddystoneCommon._make(struct.unpack('<BBHB', ad_struct[0:5]))
+        except TypeError:
+            #if we passed this as a bytestring, handle differently
+            # TODO: do this
+            logger.info('packing packet for depaction: {}'.format(ad_struct[0:5]))
+            ec = EddystoneCommon._make(struct.pack('<BBHB', ad_struct[0:5].each()))
+
+
+
         # Is this a valid Eddystone ad structure?
         if ec.eddystone_uuid == 0xFEAA and ec.service_data == 0x16:
             # Fill in the return data we know at this point
@@ -165,8 +179,7 @@ def decode_eddystone(ad_struct):
             if ec.sub_type == 0x00 and (ec.adstruct_bytes == 0x15 or
                                         ec.adstruct_bytes == 0x17):
                 # Decode Eddystone UID data (without reserved bytes)
-                EddystoneUID = namedtuple('EddystoneUID', 'rssi_ref' +
-                                          'namespace', 'instance')
+                EddystoneUID = namedtuple('EddystoneUID', 'rssi_ref namespace instance')
                 ei = EddystoneUID._make(struct.unpack('>b10s6s', ad_struct[5:22]))
                 # Fill in the return structure with the data we extracted
                 ret['sub_type'] = 'uid'
@@ -176,7 +189,7 @@ def decode_eddystone(ad_struct):
             # Is this a URL sub type?
             if ec.sub_type == 0x10:
                 # Decode Eddystone URL header
-                EddyStoneURL = namedtuple('EddystoneURL', 'rssi_ref', 'url_scheme')
+                EddyStoneURL = namedtuple('EddystoneURL', 'rssi_ref url_scheme')
                 eu = EddyStoneURL._make(struct.unpack('>bB', ad_struct[5:7]))
                 # Fill in the return structure with extracted data and init the URL
                 ret['sub_type'] = 'url'
@@ -201,8 +214,7 @@ def decode_eddystone(ad_struct):
             # Is this a TLM sub type?
             if ec.sub_type == 0x20 and ec.adstruct_bytes == 0x11:
                 # Decode Eddystone telemetry data
-                EddystoneTLM = namedtuple('EddystoneTLM', 'tlm_version' +
-                                          'vbatt', 'temp', 'adv_cnt', 'sec_cnt')
+                EddystoneTLM = namedtuple('EddystoneTLM', 'tlm_version vbatt temp adv_cnt sec_cnt')
                 #'EddystoneTLM','tlm_version','vbatt', 'temp', 'adv_cnt', 'sec_cnt')
                 et = EddystoneTLM._make(struct.unpack('>BHhLL', ad_struct[5:18]))
                 # Fill in generic TLM data
@@ -240,10 +252,7 @@ def decode_ibeacon(ad_struct):
     # Is the length correct and is our data long enough?
     if adstruct_bytes == 0x1B and adstruct_bytes <= len(ad_struct):
       # Decode the ad structure assuming iBeacon format
-        iBeaconData = namedtuple('iBeaconData', 'adstruct_bytes', 'adstruct_type' \
-                                 + 'mfg_id_low', 'mfg_id_high', 'ibeacon_id' \
-                                 + 'ibeacon_data_len ', 'uuid', 'major' \
-                                 + 'minor', 'rssi_ref')
+        iBeaconData = namedtuple('iBeaconData', 'adstruct_bytes adstruct_type mfg_id_low mfg_id_high ibeacon_id ibeacon_data_len uuid major minor rssi_ref')
         bd = iBeaconData._make(struct.unpack('>BBBBBB16sHHb', ad_struct[:27]))
         # Check whether all iBeacon specific values are correct
         if bd.adstruct_bytes == 0x1A and bd.adstruct_type == 0xFF and \
@@ -395,12 +404,13 @@ def onPacketFound(packet):
     """
     Called by the scan function for each beacon packets found.
     """
-
+    _packetstring = packet
     data = bytearray.fromhex(packet)
     barray = bytearray()
+    logger.debug('packet: {}'.format(packet))
     for bs in packet.split():
-        hb = int(HexToByte(bs))
-        logger.info("bs: {} hb: {}".format(bs,hb))
+        hb = int(bs, 16)
+        logger.debug("bs: {} hb: {}".format(bs, hb))
         barray.append(hb)
 #    barray = bytearray.fromhex(HexToByte(packet))
 #    barray = bytearray()
@@ -409,10 +419,8 @@ def onPacketFound(packet):
 #    barray.join('%02s'%s for s in foo)
 #    for b in packet.split():
 #        barray +='{}'.format(b)
-
-    logger.info('packet: {}'.format(packet))
-    logger.info('data: {}'.format(data))
-    logger.info('barray: {}'.format(barray))
+    logger.debug('  data: {}'.format(data))
+    logger.debug('barray: {}'.format(barray))
     if args.one:
         tmp = packet[:-3]
         if tmp in foundPackets:
