@@ -336,24 +336,30 @@ def onPacketFound(packet):
         if device_addr_type == 1:
             logger.debug('collecting mac addr from bytes 7-12')
             device_addr = '{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}'.format(data[12],data[11],data[10],data[9],data[8],data[7])
+            eddyPacketLength = data[13]
+            eddyAdvFrameLength = data[14]
+            eddyFlagsDatatype = data[15]
+            eddyFlagsData = data[16]
+            eddyLength     = data[17]
+            SvcUUIDdatatypeVal = data[18]
             serviceDataLength = data[21]
 #        nameSpace=struct.unpack_from('10s',data, offset=2)
 #        instance=struct.unpack_from('6s',data, offset=12)
             frameType = data[25]
 
 #        logger.info("first 20 bytes: {}".format(first20))
-            logger.info('           Packet: {}'.format(packet))
-            logger.info('   Device Address: {}'.format(device_addr))
-            logger.info('       PacketType: {}'.format(data[0]))
-            logger.info('serviceDataLength: {}'.format(data[21]))
-#        logger.info('NameSpace: {}'.format(nameSpace))
-#        logger.info('Instance: {}'.format(instance))
-            logger.info('            Event: {}'.format(data[1]))
+            logger.debug('           Packet: {}'.format(packet))
+            logger.debug('   Device Address: {}'.format(device_addr))
+            logger.debug('       PacketType: {}'.format(data[0]))
+            logger.debug('serviceDataLength: {}'.format(data[21]))
+#        logger.debug('NameSpace: {}'.format(nameSpace))
+#        logger.debug('Instance: {}'.format(instance))
+            logger.debug('            Event: {}'.format(data[1]))
             # Eddystone-URL
             decoded_packet = decode_eddystone(barray[13:])
             logger.info("Decoded [{}]: {}".format(device_addr, decoded_packet))
         else:
-            logger.info('Unknown Device address Type: {} (byte[6])'.format(data[6]))
+            logger.warn('Unknown Device address Type: {} (byte[6])'.format(data[6]))
 
 #        if frameType == 0x00:
 #            logger.debug('Eddystone-UID')

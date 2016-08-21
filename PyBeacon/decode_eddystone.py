@@ -50,12 +50,12 @@ def decode_eddystone(ad_struct):
         length = int(ad_struct[0]) + 1
         _collectedAs = 'int'
     except ValueError:
-        logger.info('failed back to collecting length from ord')
+        logger.warn('failed back to collecting length from ord')
         length = ord(ad_struct[0]) + 1
         _collectedAs = 'str'
     #adstruct_bytes = ord(ad_struct[0]) + 1
-    logger.info('Length from byte[0]: {} ({})'.format(length,_collectedAs))
-    logger.info('Length of ad_struct: {}'.format(len(ad_struct)))
+    logger.debug('Length from byte[0]: {} ({})'.format(length,_collectedAs))
+    logger.debug('Length of ad_struct: {}'.format(len(ad_struct)))
     adstruct_bytes = length
     # Create the return object
     ret = {'adstruct_bytes': adstruct_bytes, 'type': None}
@@ -65,13 +65,13 @@ def decode_eddystone(ad_struct):
                                  'sd_flags_type sd_flags_data uuid_list_len uuid_dt_val eddystone_uuid '+
                                  'eddy_len sd_type eddy_uuid_2 sub_type')
     if adstruct_bytes >= 5 and adstruct_bytes <= len(ad_struct):
-        logger.info('prepping EddystoneCommon tuple')
+        logger.debug('prepping EddystoneCommon tuple')
         # Decode the common part of the Eddystone data
         try:
             ec = EddystoneCommon._make(struct.unpack('<BBBBBBHBBHB', ad_struct[0:13]))
         except TypeError:
             #if we passed this as a bytestring, handle differently
-            logger.info('repacking packet for depaction into tuple: {}'.format(ad_struct[0:13]))
+            logger.warn('repacking packet for depaction into tuple: {}'.format(ad_struct[0:13]))
             ec = EddystoneCommon._make(struct.pack('<BBBBBBHBBHB', \
             [ ad_struct[0], ad_struct[1], ad_struct[2], ad_struct[3], \
             ad_struct[4], ad_struct[5], ad_struct[6:7], ad_struct[8], \
@@ -105,7 +105,7 @@ def decode_eddystone(ad_struct):
                 EddystoneUID = namedtuple('EddystoneUID', 'rssi_ref namespace instance')
                 ei = EddystoneUID._make(struct.unpack('>b10s6s', ad_struct[13:30]))
                 # Fill in the return structure with the data we extracted
-                logger.info('EddyStone UID: {}'.format(ei))
+                logger.debug('EddyStone UID: {}'.format(ei))
                 try:
                     ret['namespace'] = ''.join('{:02X}'.format(i) for i in ei.namespace)
                 except TypeError:
@@ -158,5 +158,6 @@ def decode_eddystone(ad_struct):
                     ret['temp'] = et.temp / 256.0
                     ret['adv_cnt'] = et.adv_cnt
                     ret['sec_cnt'] = et.sec_cnt / 10.0
+                logger.debug('EddyStone TLM: {}'.format(et))
     # Return the object
     return ret
