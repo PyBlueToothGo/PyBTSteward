@@ -97,13 +97,13 @@ def decode_eddystone(ad_struct):
             # Now select based on the sub type
             # Is this a UID sub type? (Accomodate beacons that either include or
             # exclude the reserved bytes)
-            if ec.sub_type == 0x00 and (ec.adstruct_bytes == 0x15 or
-                                        ec.adstruct_bytes == 0x17):
+            if ec.sub_type == 0x00 and (ec.eddy_len == 0x15 or
+                                        ec.eddy_len == 0x17):
+                ret['sub_type'] = 'uid'
                 # Decode Eddystone UID data (without reserved bytes)
                 EddystoneUID = namedtuple('EddystoneUID', 'rssi_ref namespace instance')
-                ei = EddystoneUID._make(struct.unpack('>b10s6s', ad_struct[5:22]))
+                ei = EddystoneUID._make(struct.unpack('>b10s6s', ad_struct[13:]))
                 # Fill in the return structure with the data we extracted
-                ret['sub_type'] = 'uid'
                 ret['namespace'] = ''.join('%02x' % ord(c) for c in ei.namespace)
                 ret['instance'] = ''.join('%02x' % ord(c) for c in ei.instance)
                 ret['rssi_ref'] = ei.rssi_ref - 41
