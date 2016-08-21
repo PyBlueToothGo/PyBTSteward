@@ -77,18 +77,18 @@ def decode_eddystone(ad_struct):
             ad_struct[4], ad_struct[5], ad_struct[6:7], ad_struct[8], \
             ad_struct[9], ad_struct[10:11], ad_struct[12]]))
 
-        logger.info('{}'.format(ec))
-        logger.info('          uuid: {:02X}'.format(ec.eddystone_uuid))
-        logger.info('adstruct_bytes: {:02X}'.format(ec.adstruct_bytes))
-        logger.info('     sd_length: {:02X}'.format(ec.sd_length))
-        logger.info(' sd_flags_type: {:02X}'.format(ec.sd_flags_type))
-        logger.info(' sd_flags_data: {:02X}'.format(ec.sd_flags_data))
-        logger.info(' uuid_list_len: {:02X}'.format(ec.uuid_list_len))
-        logger.info('   uuid_dt_val: {:02X}'.format(ec.uuid_dt_val))
-        logger.info('      eddy_len: {:02X}'.format(ec.eddy_len))
-        logger.info('       sd_type: {:02X}'.format(ec.sd_type))
-        logger.info('         uuid2: {:02X}'.format(ec.eddy_uuid_2))
-        logger.info('      sub_type: {:02X}'.format(ec.sub_type))
+        logger.debug('{}'.format(ec))
+        logger.debug('          uuid: {:02X}'.format(ec.eddystone_uuid))
+        logger.debug('adstruct_bytes: {:02X}'.format(ec.adstruct_bytes))
+        logger.debug('     sd_length: {:02X}'.format(ec.sd_length))
+        logger.debug(' sd_flags_type: {:02X}'.format(ec.sd_flags_type))
+        logger.debug(' sd_flags_data: {:02X}'.format(ec.sd_flags_data))
+        logger.debug(' uuid_list_len: {:02X}'.format(ec.uuid_list_len))
+        logger.debug('   uuid_dt_val: {:02X}'.format(ec.uuid_dt_val))
+        logger.debug('      eddy_len: {:02X}'.format(ec.eddy_len))
+        logger.debug('       sd_type: {:02X}'.format(ec.sd_type))
+        logger.debug('         uuid2: {:02X}'.format(ec.eddy_uuid_2))
+        logger.debug('      sub_type: {:02X}'.format(ec.sub_type))
         # Is this a valid Eddystone ad structure?
 
         if ec.eddystone_uuid == 0xFEAA and ec.sd_type == 0x16:
@@ -97,6 +97,7 @@ def decode_eddystone(ad_struct):
             # Now select based on the sub type
             # Is this a UID sub type? (Accomodate beacons that either include or
             # exclude the reserved bytes)
+
             if ec.sub_type == 0x00 and (ec.eddy_len == 0x15 or
                                         ec.eddy_len == 0x17):
                 ret['sub_type'] = 'uid'
@@ -116,13 +117,14 @@ def decode_eddystone(ad_struct):
                     logger.debug('interpolating Eddystone UID instance from string')
                     ret['instance'] = ''.join('%02X' % ord(c) for c in ei.instance)
                 ret['rssi_ref'] = ei.rssi_ref - 41
+
             # Is this a URL sub type?
             if ec.sub_type == 0x10:
+                ret['sub_type'] = 'url'
                 # Decode Eddystone URL header
                 EddyStoneURL = namedtuple('EddystoneURL', 'rssi_ref url_scheme')
-                eu = EddyStoneURL._make(struct.unpack('>bB', ad_struct[5:7]))
+                eu = EddyStoneURL._make(struct.unpack('>bB', ad_struct[13:20]))
                 # Fill in the return structure with extracted data and init the URL
-                ret['sub_type'] = 'url'
                 ret['rssi_ref'] = eu.rssi_ref - 41
                 ret['url'] = ['http://www.', 'https://www.', 'http://', 'https://'] \
                       [eu.url_scheme & 0x03]
@@ -143,12 +145,12 @@ def decode_eddystone(ad_struct):
                         ret['url'] += c
             # Is this a TLM sub type?
             if ec.sub_type == 0x20 and ec.eddy_len == 0x11:
+                ret['sub_type'] = 'tlm'
                 # Decode Eddystone telemetry data
                 EddystoneTLM = namedtuple('EddystoneTLM', 'tlm_version vbatt temp adv_cnt sec_cnt')
                 #'EddystoneTLM','tlm_version','vbatt', 'temp', 'adv_cnt', 'sec_cnt')
-                et = EddystoneTLM._make(struct.unpack('>BHhLL', ad_struct[5:18]))
+                et = EddystoneTLM._make(struct.unpack('>BHhLL', ad_struct[13:26]))
                 # Fill in generic TLM data
-                ret['sub_type'] = 'tlm'
                 ret['tlm_version'] = et.tlm_version
                 # Fill the return structure with data if version 0
                 if et.tlm_version == 0x00:
