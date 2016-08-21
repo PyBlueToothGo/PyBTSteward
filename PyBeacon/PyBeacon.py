@@ -31,7 +31,6 @@ import subprocess
 import sys
 import time
 import PyBeacon.wpl_cfg_parser
-import PyBeacon.decode_eddystone
 import PyBeacon.wpl_log
 import PyBeacon.wpl_stats
 import bluetooth._bluetooth as bluez
@@ -40,6 +39,7 @@ import uuid
 from . import __version__
 from pprint import pprint
 from PyBeacon.wpl_cfg_parser import wpl_cfg
+from PyBeacon.decode_eddystone import decode_eddystone
 
 application_name = 'PyBeacon'
 version = __version__ + 'beta'
