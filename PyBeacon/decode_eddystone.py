@@ -61,21 +61,24 @@ def decode_eddystone(ad_struct):
     ret = {'adstruct_bytes': adstruct_bytes, 'type': None}
     # Is our data long enough to decode as Eddystone?
 
-    EddystoneCommon = namedtuple('EddystoneCommon', 'adstruct_bytes service_data eddystone_uuid sub_type')
+    EddystoneCommon = namedtuple('EddystoneCommon', 'adstruct_bytes sd_length service_data eddystone_uuid sub_type')
     if adstruct_bytes >= 5 and adstruct_bytes <= len(ad_struct):
         logger.info('prepping EddystoneCommon tuple')
         # Decode the common part of the Eddystone data
         try:
-            ec = EddystoneCommon._make(struct.unpack('<BBHB', ad_struct[0:8]))
+            ec = EddystoneCommon._make(struct.unpack('<BBiHB', ad_struct[0:9]))
         except TypeError:
             #if we passed this as a bytestring, handle differently
             # TODO: do this
             logger.info('repacking packet for depaction into tuple: {}'.format(ad_struct[0:9]))
-            ec = EddystoneCommon._make(struct.pack('<BBHB', [ ad_struct[0],ad_struct[1:5],ad_struct[6:7],ad_struct[8]]))
+            ec = EddystoneCommon._make(struct.pack('<BBiHB', [ ad_struct[0],ad_struct[1],ad_struct[2:5],ad_struct[6:7],ad_struct[8]]))
 
         logger.info('{}'.format(ec))
-        logger.info('uuid: {}'.format(ec.eddystone_uuid))
-        logger.info('adstruct_bytes: {}'.format(ec.eddystone_uuid))
+        logger.info('uuid: {%02X}'.format(ec.eddystone_uuid))
+        logger.info('adstruct_bytes: {%02X}'.format(ec.adstruct_bytes))
+        logger.info('sd_length: {%02X}'.format(ec.sd_length))
+        logger.info('service_data: {%02X}'.format(ec.service_data))
+        logger.info('sub_type: {%02X}'.format(ec.sub_type))
         # Is this a valid Eddystone ad structure?
 
         if ec.eddystone_uuid == 0xFEAA and ec.service_data == 0x16:
