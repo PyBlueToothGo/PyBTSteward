@@ -319,21 +319,27 @@ def onPacketFound(packet):
         packetType = data[0]
         event = data[1]
         packetLength = data[2]
-        serviceDataLength = data[21]
+        device_addr_type = data[6]
+        if device_addr_type == 1:
+            logger.info('collecting mac addr from bytes 7-12')
+            device_addr = '{}:{}:{}:{}:{}:{}'.format(data[12],data[11],data[10],data[9],data[8],data[7])
+            serviceDataLength = data[21]
 #        nameSpace=struct.unpack_from('10s',data, offset=2)
 #        instance=struct.unpack_from('6s',data, offset=12)
-        frameType = data[25]
+            frameType = data[25]
 
 #        logger.info("first 20 bytes: {}".format(first20))
-        logger.info('       PacketType: {}'.format(data[0]))
-        logger.info('serviceDataLength: {}'.format(data[21]))
+            logger.info('   Device Address: {}'.format(device_addr))
+            logger.info('       PacketType: {}'.format(data[0]))
+            logger.info('serviceDataLength: {}'.format(data[21]))
 #        logger.info('NameSpace: {}'.format(nameSpace))
 #        logger.info('Instance: {}'.format(instance))
-        logger.info('            Event: {}'.format(data[1]))
-
-
-        # Eddystone-URL
-        decoded_packet = decode_eddystone(barray[2:])
+            logger.info('            Event: {}'.format(data[1]))
+            # Eddystone-URL
+            decoded_packet = decode_eddystone(barray[13:])
+            logger.info("Decoded [{}]: {}".format(device_addr, decoded_packet))
+        else:
+            logger.info('Unknown Device address Type: {} (byte[6])'.format(data[6]))
 
 #        if frameType == 0x00:
 #            logger.debug('Eddystone-UID')
@@ -359,7 +365,6 @@ def onPacketFound(packet):
 #            logger.debug('Eddystone-EID')
 #        else:
 #            logger.debug("Unknown Eddystone frame type: {}".format(frameType))
-        logger.info("Decoded: {}".format(decoded_packet))
 
 
     # UriBeacon
