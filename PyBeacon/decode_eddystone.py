@@ -16,7 +16,7 @@ import bluetooth._bluetooth as bluez
 import uuid
 from . import __version__
 from PyBeacon.wpl_cfg_parser import wpl_cfg
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('decode_eddystone')
 
 def decode_eddystone(ad_struct):
     """Ad structure decoder for Eddystone
