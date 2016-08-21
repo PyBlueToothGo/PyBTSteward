@@ -48,10 +48,13 @@ def decode_eddystone(ad_struct):
     # Get the length of the ad structure (including the length byte)
     try:
         length = int(ad_struct[0]) + 1
+        _collectedAs = 'int'
     except ValueError:
+        logger.info('failed back to collecting length from ord')
         length = ord(ad_struct[0]) + 1
+        _collectedAs = 'str'
     #adstruct_bytes = ord(ad_struct[0]) + 1
-    logger.info('Length from byte[0]: {}'.format(length))
+    logger.info('Length from byte[0]: {} ({})'.format(length,_collectedAs))
     logger.info('Length of ad_struct: {}'.format(len(ad_struct)))
     adstruct_bytes = length
     # Create the return object
@@ -63,12 +66,12 @@ def decode_eddystone(ad_struct):
         logger.info('prepping EddystoneCommon tuple')
         # Decode the common part of the Eddystone data
         try:
-            ec = EddystoneCommon._make(struct.unpack('<BBHB', ad_struct[5:]))
+            ec = EddystoneCommon._make(struct.unpack('<BBHB', ad_struct[0:8]))
         except TypeError:
             #if we passed this as a bytestring, handle differently
             # TODO: do this
-            logger.info('repacking packet for depaction into tuple: {}'.format(ad_struct[5:]))
-            ec = EddystoneCommon._make(struct.pack('<BBHB', ad_struct[5:].each()))
+            logger.info('repacking packet for depaction into tuple: {}'.format(ad_struct[0:9]))
+            ec = EddystoneCommon._make(struct.pack('<BBHB', [ ad_struct[0],ad_struct[1:5],ad_struct[6:7],ad_struct[8]]))
 
         logger.info('{}'.format(ec))
         logger.info('uuid: {}'.format(ec.eddystone_uuid))

@@ -334,7 +334,7 @@ def onPacketFound(packet):
         packetLength = data[2]
         device_addr_type = data[6]
         if device_addr_type == 1:
-            logger.info('collecting mac addr from bytes 7-12')
+            logger.debug('collecting mac addr from bytes 7-12')
             device_addr = '{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}'.format(data[12],data[11],data[10],data[9],data[8],data[7])
             serviceDataLength = data[21]
 #        nameSpace=struct.unpack_from('10s',data, offset=2)
