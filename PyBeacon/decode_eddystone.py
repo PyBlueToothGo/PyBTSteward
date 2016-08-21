@@ -74,11 +74,11 @@ def decode_eddystone(ad_struct):
             ec = EddystoneCommon._make(struct.pack('<BBiHB', [ ad_struct[0],ad_struct[1],ad_struct[2:5],ad_struct[6:7],ad_struct[8]]))
 
         logger.info('{}'.format(ec))
-        logger.info('uuid: {%02X}'.format(ec.eddystone_uuid))
-        logger.info('adstruct_bytes: {%02X}'.format(ec.adstruct_bytes))
-        logger.info('sd_length: {%02X}'.format(ec.sd_length))
-        logger.info('service_data: {%02X}'.format(ec.service_data))
-        logger.info('sub_type: {%02X}'.format(ec.sub_type))
+        logger.info('uuid: {:02X}'.format(ec.eddystone_uuid))
+        logger.info('adstruct_bytes: {:02X}'.format(ec.adstruct_bytes))
+        logger.info('sd_length: {:02X}'.format(ec.sd_length))
+        logger.info('service_data: {:02X}'.format(ec.service_data))
+        logger.info('sub_type: {:02X}'.format(ec.sub_type))
         # Is this a valid Eddystone ad structure?
 
         if ec.eddystone_uuid == 0xFEAA and ec.service_data == 0x16:
