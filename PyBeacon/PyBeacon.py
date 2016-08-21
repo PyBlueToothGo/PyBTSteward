@@ -316,22 +316,23 @@ def onPacketFound(packet):
     # Eddystone
     if len(data) >= 20 and data[19] == 0xaa and data[20] == 0xfe:
 #        first20 = struct.unpack_from('>ii10c6cbb', data,)
-        PacketType = data[0]
-
-        TxPwr = data[1]
+        packetType = data[0]
+        event = data[1]
+        packetLength = data[2]
         serviceDataLength = data[21]
 #        nameSpace=struct.unpack_from('10s',data, offset=2)
 #        instance=struct.unpack_from('6s',data, offset=12)
         frameType = data[25]
 
 #        logger.info("first 20 bytes: {}".format(first20))
+        logger.info('       PacketType: {}'.format(data[0]))
         logger.info('serviceDataLength: {}'.format(data[21]))
 #        logger.info('NameSpace: {}'.format(nameSpace))
 #        logger.info('Instance: {}'.format(instance))
-        logger.info('Tx Power: {}'.format(TxPwr))
+        logger.info('            Event: {}'.format(data[1]))
 
         # Eddystone-URL
-        decoded_packet = decode_eddystone(barray)
+        decoded_packet = decode_eddystone(barray[2:])
 
 #        if frameType == 0x00:
 #            logger.debug('Eddystone-UID')
