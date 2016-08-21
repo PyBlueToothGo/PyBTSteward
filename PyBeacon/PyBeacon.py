@@ -306,7 +306,7 @@ def onPacketFound(packet):
     _packetstring = packet
     data = bytearray.fromhex(packet)
     barray = bytearray()
-    logger.debug('packet: {}'.format(packet))
+    #logger.debug('packet: {}'.format(packet))
     for bs in packet.split():
         hb = int(bs, 16)
         logger.debug("bs: {} hb: {}".format(bs, hb))
@@ -342,6 +342,7 @@ def onPacketFound(packet):
             frameType = data[25]
 
 #        logger.info("first 20 bytes: {}".format(first20))
+            logger.info('           Packet: {}'.format(packet))
             logger.info('   Device Address: {}'.format(device_addr))
             logger.info('       PacketType: {}'.format(data[0]))
             logger.info('serviceDataLength: {}'.format(data[21]))

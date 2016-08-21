@@ -61,27 +61,31 @@ def decode_eddystone(ad_struct):
     ret = {'adstruct_bytes': adstruct_bytes, 'type': None}
     # Is our data long enough to decode as Eddystone?
 
-    EddystoneCommon = namedtuple('EddystoneCommon', 'adstruct_bytes sd_length service_data eddystone_uuid sub_type')
+    EddystoneCommon = namedtuple('EddystoneCommon', 'adstruct_bytes sd_length '+
+                                 'sd_flags_type sd_flags_data eddystone_uuid '+
+                                 'eddy_len sd_type eddy_uuid_2')
     if adstruct_bytes >= 5 and adstruct_bytes <= len(ad_struct):
         logger.info('prepping EddystoneCommon tuple')
         # Decode the common part of the Eddystone data
         try:
-            ec = EddystoneCommon._make(struct.unpack('<BBiHB', ad_struct[0:9]))
+            ec = EddystoneCommon._make(struct.unpack('<BBBBBHBBH', ad_struct[0:10]))
         except TypeError:
             #if we passed this as a bytestring, handle differently
-            # TODO: do this
-            logger.info('repacking packet for depaction into tuple: {}'.format(ad_struct[0:9]))
-            ec = EddystoneCommon._make(struct.pack('<BBiHB', [ ad_struct[0],ad_struct[1],ad_struct[2:5],ad_struct[6:7],ad_struct[8]]))
+            logger.info('repacking packet for depaction into tuple: {}'.format(ad_struct[0:10]))
+            ec = EddystoneCommon._make(struct.pack('<BBBBBHBBH', [ ad_struct[0], ad_struct[1], ad_struct[2], ad_struct[3], ad_struct[4],ad_struct[5:6], ad_struct[7], ad_struct[8],ad_struct[9,10]]))
 
         logger.info('{}'.format(ec))
-        logger.info('uuid: {:02X}'.format(ec.eddystone_uuid))
+        logger.info('          uuid: {:02X}'.format(ec.eddystone_uuid))
         logger.info('adstruct_bytes: {:02X}'.format(ec.adstruct_bytes))
-        logger.info('sd_length: {:02X}'.format(ec.sd_length))
-        logger.info('service_data: {:02X}'.format(ec.service_data))
-        logger.info('sub_type: {:02X}'.format(ec.sub_type))
+        logger.info('     sd_length: {:02X}'.format(ec.sd_length))
+        logger.info(' sd_flags_type: {:02X}'.format(ec.sd_flags_type))
+        logger.info(' sd_flags_data: {:02X}'.format(ec.sd_flags_data))
+        logger.info('      eddy_len: {:02X}'.format(ec.eddy_len))
+        logger.info('       sd_type: {:02X}'.format(ec.sd_type))
+        logger.info('         uuid2: {:02X}'.format(ec.eddy_uuid_2))
         # Is this a valid Eddystone ad structure?
 
-        if ec.eddystone_uuid == 0xFEAA and ec.service_data == 0x16:
+        if ec.eddystone_uuid == 0xFEAA and ec.sd_type == 0x16:
             # Fill in the return data we know at this point
             ret['type'] = 'eddystone'
             # Now select based on the sub type
