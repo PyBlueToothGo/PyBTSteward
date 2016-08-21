@@ -62,17 +62,20 @@ def decode_eddystone(ad_struct):
     # Is our data long enough to decode as Eddystone?
 
     EddystoneCommon = namedtuple('EddystoneCommon', 'adstruct_bytes sd_length '+
-                                 'sd_flags_type sd_flags_data eddystone_uuid '+
-                                 'eddy_len sd_type eddy_uuid_2')
+                                 'sd_flags_type sd_flags_data uuid_list_len uuid_dt_val eddystone_uuid '+
+                                 'eddy_len sd_type eddy_uuid_2 sub_type')
     if adstruct_bytes >= 5 and adstruct_bytes <= len(ad_struct):
         logger.info('prepping EddystoneCommon tuple')
         # Decode the common part of the Eddystone data
         try:
-            ec = EddystoneCommon._make(struct.unpack('<BBBBBHBBH', ad_struct[0:10]))
+            ec = EddystoneCommon._make(struct.unpack('<BBBBBBHBBHB', ad_struct[0:13]))
         except TypeError:
             #if we passed this as a bytestring, handle differently
-            logger.info('repacking packet for depaction into tuple: {}'.format(ad_struct[0:10]))
-            ec = EddystoneCommon._make(struct.pack('<BBBBBHBBH', [ ad_struct[0], ad_struct[1], ad_struct[2], ad_struct[3], ad_struct[4],ad_struct[5:6], ad_struct[7], ad_struct[8],ad_struct[9,10]]))
+            logger.info('repacking packet for depaction into tuple: {}'.format(ad_struct[0:13]))
+            ec = EddystoneCommon._make(struct.pack('<BBBBBBHBBHB', \
+            [ ad_struct[0], ad_struct[1], ad_struct[2], ad_struct[3], \
+            ad_struct[4], ad_struct[5], ad_struct[6:7], ad_struct[8], \
+            ad_struct[9], ad_struct[10:11], ad_struct[12]]))
 
         logger.info('{}'.format(ec))
         logger.info('          uuid: {:02X}'.format(ec.eddystone_uuid))
@@ -80,9 +83,12 @@ def decode_eddystone(ad_struct):
         logger.info('     sd_length: {:02X}'.format(ec.sd_length))
         logger.info(' sd_flags_type: {:02X}'.format(ec.sd_flags_type))
         logger.info(' sd_flags_data: {:02X}'.format(ec.sd_flags_data))
+        logger.info(' uuid_list_len: {:02X}'.format(ec.uuid_list_len))
+        logger.info('   uuid_dt_val: {:02X}'.format(ec.uuid_dt_val))
         logger.info('      eddy_len: {:02X}'.format(ec.eddy_len))
         logger.info('       sd_type: {:02X}'.format(ec.sd_type))
         logger.info('         uuid2: {:02X}'.format(ec.eddy_uuid_2))
+        logger.info('      sub_type: {:02X}'.format(ec.sub_type))
         # Is this a valid Eddystone ad structure?
 
         if ec.eddystone_uuid == 0xFEAA and ec.sd_type == 0x16:
