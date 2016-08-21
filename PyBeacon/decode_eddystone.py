@@ -102,7 +102,7 @@ def decode_eddystone(ad_struct):
                 ret['sub_type'] = 'uid'
                 # Decode Eddystone UID data (without reserved bytes)
                 EddystoneUID = namedtuple('EddystoneUID', 'rssi_ref namespace instance')
-                ei = EddystoneUID._make(struct.unpack('>b10s6s', [ ad_struct[13:30]))
+                ei = EddystoneUID._make(struct.unpack('>b10s6s', ad_struct[13:30]))
                 # Fill in the return structure with the data we extracted
                 logger.info('EddyStone UID: {}'.format(ei))
                 ret['namespace'] = ''.join('%02x' % ord(c) for c in ei.namespace)
