@@ -31,6 +31,7 @@ import subprocess
 import sys
 import time
 import PyBeacon.wpl_cfg_parser
+import PyBeacon.decode_eddystone
 import PyBeacon.wpl_log
 import PyBeacon.wpl_stats
 import bluetooth._bluetooth as bluez
