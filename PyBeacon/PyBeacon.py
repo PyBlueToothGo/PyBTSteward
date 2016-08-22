@@ -261,7 +261,7 @@ def onUrlFound(url):
 
 foundPackets = set()
 
-def onPacketFound(config,packet):
+def onPacketFound(config, packet):
     """
     Called by the scan function for each beacon packets found.
     """
@@ -301,7 +301,7 @@ def onPacketFound(config,packet):
             serviceDataLength  = data[21]
             frameType          = data[25]
 #            logger.debug('           Packet: {}'.format(packet))
-#            logger.debug('   Device Address: {}'.format(device_addr))
+            logger.info('   Device Address: {}'.format(device_addr))
 #            logger.debug('       PacketType: {}'.format(data[0]))
 #            logger.debug('serviceDataLength: {}'.format(data[21]))
 #            logger.debug('            Event: {}'.format(data[1]))
@@ -337,6 +337,8 @@ def scan(duration=None):
     #Re-Check the config in case it changed.
     config = wpl_cfg()
     logger.info("Scanning...")
+    for bcn in config['Beacons']['eddystone']['devices']:
+        logger.info('configured beacon: {}'.format(bcn))
     subprocess.call("sudo hciconfig hci0 reset", shell=True, stdout=DEVNULL)
 
     lescan = subprocess.Popen(
