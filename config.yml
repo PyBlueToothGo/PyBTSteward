@@ -33,9 +33,9 @@ Beacons:
         name: 'workoutlandia'
         enabled: true
   estimote:
-      default:
-        enabled: false
-        report_telemetry: false
-      devices:
-        -'sample':
-            mac: 'AA:AA:AA:AA:AA:AA'
+    default:
+      enabled: false
+      report_telemetry: false
+    devices:
+      AAAAAAAAAAAA:
+          name: 'test'
