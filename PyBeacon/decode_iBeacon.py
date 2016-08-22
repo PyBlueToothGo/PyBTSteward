@@ -18,7 +18,7 @@ from . import __version__
 from PyBeacon.wpl_cfg_parser import wpl_cfg
 logger = logging.getLogger(__name__)
 
-def decode_ibeacon(ad_struct):
+def decode_iBeacon(ad_struct):
     """Ad structure decoder for iBeacon
     Returns a dictionary with the following fields if the ad structure is a
     valid mfg spec iBeacon structure:
