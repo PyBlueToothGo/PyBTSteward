@@ -304,8 +304,8 @@ def onPacketFound(packet):
 #            logger.debug('       PacketType: {}'.format(data[0]))
 #            logger.debug('serviceDataLength: {}'.format(data[21]))
 #            logger.debug('            Event: {}'.format(data[1]))
-            if device_addr in config['Beacons']['eddystone']['devices']:
-                devCfg = config['Beacons']['eddystone']['devices'][device_addr]
+            if device_addr in conf['Beacons']['eddystone']['devices']:
+                devCfg = conf['Beacons']['eddystone']['devices'][device_addr]
                 logger.info('RX Packet for {}'.format(devCfg['name']))
                 if devCfg['enabled'] == True:
                     decoded_packet = decode_eddystone(barray[13:])
@@ -315,30 +315,9 @@ def onPacketFound(packet):
         else:
             logger.warn('Unknown Device address Type: {} (byte[6])'.format(data[6]))
 
-#        if frameType == 0x00:
-#            logger.debug('Eddystone-UID')
-#        elif frameType == 0x10:
-#            logger.debug('Eddystone-URL')
-#            #onUrlFound(decodeUrl(data[27:22 + serviceDataLength]))
-#        elif frameType == 0x20:
 #https://github.com/google/eddystone/blob/master/eddystone-tlm/tlm-plain.md
 #https://docs.python.org/3/library/struct.html
 #https://forums.estimote.com/t/temperature-on-eddystone-tlm-without-estimote-sdk-android/2485
-#            logger.debug('Eddystone-TLM')
-#            tlmVersion = data[26]
-#            tlmBatt = struct.unpack_from('>H', data, offset=27)
-#            _tempint = struct.unpack_from('b', data, offset=29)
-#            _tempfract = struct.unpack_from('b', data, offset=30)
-#            temp = (_tempint[0] + (_tempfract[0] / 256.0))
-#            tlmAdvCount = struct.unpack_from('>l', data, offset=31)
-#            tlmUptime = struct.unpack_from('>l',data, offset=35)
-#            logger.info("telem: V:{} B:{} T:{} A:{}" \
-#                        + " U:{}".format(tlmVersion,tlmBatt[0],temp \
-#                        +  tlmAdvCount[0],tlmUptime[0]))
-#        elif frameType == 0x30:
-#            logger.debug('Eddystone-EID')
-#        else:
-#            logger.debug("Unknown Eddystone frame type: {}".format(frameType))
 
 
     # UriBeacon
