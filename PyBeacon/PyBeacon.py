@@ -319,7 +319,6 @@ def onPacketFound(packet):
 #https://docs.python.org/3/library/struct.html
 #https://forums.estimote.com/t/temperature-on-eddystone-tlm-without-estimote-sdk-android/2485
 
-
     # UriBeacon
     elif len(data) >= 20 and data[19] == 0xd8 and data[20] == 0xfe:
         serviceDataLength = data[21]
@@ -328,8 +327,6 @@ def onPacketFound(packet):
 
     else:
         logger.debug("Unknown beacon type")
-        #verboseOutput(packet)
-
 
 def scan(duration=None):
     """
@@ -406,7 +403,7 @@ def stopAdvertising():
 def showVersion():
     print(application_name + " " + version)
 
-def main():
+def main(conf=conf):
     if args.version:
         showVersion()
     else:
@@ -416,7 +413,10 @@ def main():
         elif args.one:
             scan(3)
         elif args.scan:
-            scan()
+            while True:
+                scan(conf['Global']['interval'])
+                logger.info('Sleeping...')
+                time.sleep(conf['Global']['interval'])
         else:
             advertise(args.url)
 
@@ -427,4 +427,4 @@ if __name__ == "__main__":
     else:
         logger.setLevel(logging.INFO)
     logger.debug('Config: %r', conf)
-    main()
+    main(conf)
