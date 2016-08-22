@@ -312,18 +312,21 @@ def onPacketFound(config, packet):
                 if devCfg['enabled'] == True:
                     decoded_packet = decode_eddystone(barray[13:])
                     if decoded_packet['sub_type'] == 'tlm':
-                        logger.info('RX Edy-tlm Packet for {}'.format(devCfg['name']))
+                        logger.debug('RX Edy-tlm Packet for %s', devCfg['name'])
                         if devCfg['report_telemetry'] == True:
-                            logger.info('Reporting telemetry for {}'.format(devCfg['name']))
+                            logger.info('Reporting telemetry for %s', devCfg['name'])
+                            logger.info(decoded_packet)
+                            #wpl_stats.sendstat_gauge('{}.{}'.format(devCfg['name']))
                         else:
-                            logger.info('discarding telemetry for {}'.format(devCfg['name']))
+                            logger.debug('discarding telemetry for %s', devCfg['name'])
 
                     elif decoded_packet['sub_type'] == 'uid':
-                        logger.info('RX Edy-uid Packet for {}'.format(devCfg['name']))
+                        logger.debug('RX Edy-uid Packet for %s', devCfg['name'])
                         if devCfg['report_rssi'] == True:
-                            logger.info('Reporting rssi for {}'.format(devCfg['name']))
+                            logger.info('Reporting rssi for %s', devCfg['name'])
+                            logger.info(decoded_packet)
                         else:
-                            logger.info('discarding rssi for {}'.format(devCfg['name']))
+                            logger.debug('discarding rssi for %s', devCfg['name'])
 
 
                     else:
@@ -356,8 +359,9 @@ def scan(duration=None):
     #Re-Check the config in case it changed.
     config = wpl_cfg()
     logger.info("Scanning...")
-    for bcn in config['Beacons']['eddystone']['devices']:
-        logger.info('configured beacon: {}'.format(bcn))
+    if config['Logging']['list_devices_in_cfg'] == True:
+        for bcn in config['Beacons']['eddystone']['devices']:
+            logger.info('configured beacon: {}'.format(bcn))
     subprocess.call("sudo hciconfig hci0 reset", shell=True, stdout=DEVNULL)
 
     lescan = subprocess.Popen(
@@ -388,7 +392,9 @@ def scan(duration=None):
 
     subprocess.call(["sudo", "kill", str(dump.pid), "-s", "SIGINT"])
     subprocess.call(["sudo", "-n", "kill", str(lescan.pid), "-s", "SIGINT"])
-
+    #TODO: make this whole process better.
+    # grep -q 'hcidump' /proc/[[:digit:]]*/cmdline; echo $?
+    # will give 0/1 if running.
 
 def advertise(url):
     logger.info("Advertising: " + url)
