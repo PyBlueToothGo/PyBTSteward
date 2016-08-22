@@ -31,4 +31,6 @@ def wpl_cfg(cfg='config.yml'):
         _config['Beacons']['eddystone']['devices'] = _fattened_eddy_devices
         if _config['Logging']['print_on_load'] == True:
             pprint(_config)
+        else:
+            logger.info('Configuration Reloaded')
         return _config
