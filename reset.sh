@@ -1,4 +1,5 @@
 #!/bin/bash
+source bin/activate
 pip uninstall PyBeacon -y;
 git clean -df
 git reset --hard
