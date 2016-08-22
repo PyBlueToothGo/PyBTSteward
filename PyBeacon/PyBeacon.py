@@ -261,10 +261,11 @@ def onUrlFound(url):
 
 foundPackets = set()
 
-def onPacketFound(packet):
+def onPacketFound(config,packet):
     """
     Called by the scan function for each beacon packets found.
     """
+    cfg = config
     _packetstring = packet
     data = bytearray.fromhex(packet)
     barray = bytearray()
@@ -304,8 +305,8 @@ def onPacketFound(packet):
 #            logger.debug('       PacketType: {}'.format(data[0]))
 #            logger.debug('serviceDataLength: {}'.format(data[21]))
 #            logger.debug('            Event: {}'.format(data[1]))
-            if device_addr in conf['Beacons']['eddystone']['devices']:
-                devCfg = conf['Beacons']['eddystone']['devices'][device_addr]
+            if device_addr in cfg['Beacons']['eddystone']['devices']:
+                devCfg = cfg['Beacons']['eddystone']['devices'][device_addr]
                 logger.info('RX Packet for {}'.format(devCfg['name']))
                 if devCfg['enabled'] == True:
                     decoded_packet = decode_eddystone(barray[13:])
@@ -333,7 +334,8 @@ def scan(duration=None):
     Scan for beacons. This function scans for [duration] seconds. If duration
     is set to None, it scans until interrupted.
     """
-
+    #Re-Check the config in case it changed.
+    config = wpl_cfg()
     logger.info("Scanning...")
     subprocess.call("sudo hciconfig hci0 reset", shell=True, stdout=DEVNULL)
 
@@ -349,10 +351,10 @@ def scan(duration=None):
         for line in dump.stdout:
             line = line.decode()
             if line.startswith("> "):
-                if packet: onPacketFound(packet)
+                if packet: onPacketFound(config, packet)
                 packet = line[2:].strip()
             elif line.startswith("< "):
-                if packet: onPacketFound(packet)
+                if packet: onPacketFound(config, packet)
                 packet = None
             else:
                 if packet: packet += " " + line.strip()
@@ -403,7 +405,7 @@ def stopAdvertising():
 def showVersion():
     print(application_name + " " + version)
 
-def main(conf=conf):
+def main():
     if args.version:
         showVersion()
     else:
@@ -427,4 +429,4 @@ if __name__ == "__main__":
     else:
         logger.setLevel(logging.INFO)
     logger.debug('Config: %r', conf)
-    main(conf)
+    main()
