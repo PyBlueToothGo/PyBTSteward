@@ -405,7 +405,7 @@ def stopAdvertising():
 def showVersion():
     print(application_name + " " + version)
 
-def main():
+def main(conf):
     if args.version:
         showVersion()
     else:
@@ -429,4 +429,4 @@ if __name__ == "__main__":
     else:
         logger.setLevel(logging.INFO)
     logger.debug('Config: %r', conf)
-    main()
+    main(conf)
