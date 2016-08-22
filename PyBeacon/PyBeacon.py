@@ -42,6 +42,7 @@ from PyBeacon.wpl_cfg_parser import wpl_cfg
 from PyBeacon.wpl_stats import sendstat_gauge
 from PyBeacon.decode_eddystone import decode_eddystone
 from PyBeacon.decode_iBeacon import decode_iBeacon
+from PyBeacon.temp_utils import CtoF, FtoC
 
 application_name = 'PyBeacon'
 version = __version__ + 'beta'
@@ -286,9 +287,9 @@ def onPacketFound(config, packet):
     # Eddystone
     if len(data) >= 20 and data[19] == 0xaa and data[20] == 0xfe:
 #        first20 = struct.unpack_from('>ii10c6cbb', data,)
-        packetType = data[0]
-        event = data[1]
-        packetLength = data[2]
+        packetType       = data[0]
+        event            = data[1]
+        packetLength     = data[2]
         device_addr_type = data[6]
         if device_addr_type == 1:
             logger.debug('collecting mac addr from bytes 7-12')
@@ -315,24 +316,30 @@ def onPacketFound(config, packet):
                         logger.debug('RX Edy-tlm Packet for %s', devCfg['name'])
                         if devCfg['report_telemetry'] == True:
                             logger.debug('Reporting telemetry for %s', devCfg['name'])
-                            #logger.info(decoded_packet)
-
-                            {'temp': 25.875, 'adv_cnt': 231264, 'vbatt': 6.108, 'tlm_version': 0, 'type': 'eddystone', 'sub_type': 'tlm', 'adstruct_bytes': 26, 'sec_cnt': 3345892.0}
+                            #logger.debug(decoded_packet)
                             if devCfg['report_telemetry_rate'] == True:
-                                logger.info('%s.advCount %s', devCfg['name'], decoded_packet['adv_cnt'])
-                                #wpl_stats.sendstat_gauge('{}.advCount'.format(devCfg['name']),decoded_packet['adv_cnt'] )
+                                logger.debug('%s.advCount %s', devCfg['name'], decoded_packet['adv_cnt'])
+                                sendstat_gauge('{}.advCount'.format(devCfg['name']),decoded_packet['adv_cnt'] )
                             if devCfg['report_telemetry_uptime'] == True:
-                                logger.info('%s.uptime %s', devCfg['name'], decoded_packet['sec_cnt'])
-                                #wpl_stats.sendstat_gauge('{}.uptime'.format(devCfg['name']),decoded_packet['sec_cnt'] )
+                                logger.debug('%s.uptime %s', devCfg['name'], decoded_packet['sec_cnt'])
+                                sendstat_gauge('{}.uptime'.format(devCfg['name']),decoded_packet['sec_cnt'] )
                             if devCfg['report_telemetry_voltage'] == True:
-                                logger.info('%s.voltage %s', devCfg['name'], decoded_packet['vbatt'])
-                                #wpl_stats.sendstat_gauge('{}.voltage'.format(devCfg['name']),decoded_packet['vbatt'] )
+                                logger.debug('%s.voltage %s', devCfg['name'], decoded_packet['vbatt'])
+                                sendstat_gauge('{}.voltage'.format(devCfg['name']),decoded_packet['vbatt'] )
                             if devCfg['report_telemetry_temp'] == True:
-                                logger.info('%s.temp %s', devCfg['name'], decoded_packet['temp'])
-                                #wpl_stats.sendstat_gauge('{}.temp'.format(devCfg['name']),decoded_packet['temp'] )
+                                if devCfg['native_temp_unit'] != devCfg['output_temp_unit']:
+                                    if devCfg['native_temp_unit'] == 'c':
+                                        _temp = CtoF(decoded_packet['temp'])
+                                    else:
+                                        _temp = FtoC(decoded_packet['temp'])
+                                    logger.info('Temp conversion performed %s: %s%s -> %s%s', devCfg['name'], decoded_packet['temp'], devCfg['native_temp_unit'], _temp, devCfg['output_temp_unit'])
+                                else:
+                                    _temp = decoded_packet['temp']
+                                logger.debug('%s.temp %s', devCfg['name'], _temp)
+                                sendstat_gauge('{}.temp'.format(devCfg['name']),_temp)
                             if devCfg['report_telemetry_bytes'] == True:
-                                logger.info('%s.bytes %s', devCfg['name'], decoded_packet['adstruct_bytes'])
-                                #wpl_stats.sendstat_gauge('{}.bytes'.format(devCfg['name']),decoded_packet['adstruct_bytes'] )
+                                logger.debug('%s.bytes %s', devCfg['name'], decoded_packet['adstruct_bytes'])
+                                sendstat_gauge('{}.bytes'.format(devCfg['name']),decoded_packet['adstruct_bytes'] )
                         else:
                             logger.debug('discarding telemetry for %s', devCfg['name'])
 

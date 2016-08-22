@@ -39,6 +39,7 @@ Beacons:
       report_uid_rate: false
       report_rssi: false
       native_temp_unit: 'c'
+      output_temp_unit: 'f'
     devices:
       DF0A6A74BFDD:
         name: 'barn_ext'
