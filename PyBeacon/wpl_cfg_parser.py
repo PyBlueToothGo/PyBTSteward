@@ -26,7 +26,7 @@ def wpl_cfg(cfg='config.yml'):
         _eddy_devices = _config_from_file['Beacons']['eddystone']['devices']
         for _eddy, _eddy_dict in _eddy_devices.items():
             _defaults = _default_eddy_attrs.copy()
-            logger.info('Merging %s with defaults', _eddy)
+            logger.info('Merging %s with defaults', _eddy_dict['name'])
             _fattened_eddy_devices[_eddy] = smerge_dicts(_defaults, _eddy_dict)
         _config['Beacons']['eddystone']['devices'] = _fattened_eddy_devices
         if _config['Logging']['print_on_load'] == True:
