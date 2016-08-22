@@ -311,9 +311,9 @@ def onPacketFound(config, packet):
                 if devCfg['enabled'] == True:
                     decoded_packet = decode_eddystone(barray[13:])
                     if decoded_packet['sub_type'] == 'tlm':
-                        logger.debug('RX Edy-tlm Packet for {}'.format(devCfg['name']))
+                        logger.info('RX Edy-tlm Packet for {}'.format(devCfg['name']))
                     elif decoded_packet['sub_type'] == 'uid':
-                        logger.debug('RX Edy-uid Packet for {}'.format(devCfg['name']))
+                        logger.info('RX Edy-uid Packet for {}'.format(devCfg['name']))
                     else:
                         logger.warn('Unknown Estimote packet for device {}: {}'.format(device_addr, decoded_packet))
 
