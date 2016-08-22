@@ -332,7 +332,7 @@ def onPacketFound(config, packet):
                                         _temp = CtoF(decoded_packet['temp'])
                                     else:
                                         _temp = FtoC(decoded_packet['temp'])
-                                    logger.debug('Temp conversion performed %s: %s%s -> %s%s', devCfg['name'], decoded_packet['temp'], devCfg['native_temp_unit'], _temp, devCfg['output_temp_unit'])
+                                    logger.debug('%s converted: %s%s -> %s%s', devCfg['name'], decoded_packet['temp'], devCfg['native_temp_unit'], _temp, devCfg['output_temp_unit'])
                                 else:
                                     _temp = decoded_packet['temp']
                                 logger.debug('%s.temp %s', devCfg['name'], _temp)
@@ -345,9 +345,9 @@ def onPacketFound(config, packet):
 
                     elif decoded_packet['sub_type'] == 'uid':
                         logger.debug('RX Edy-uid Packet for %s', devCfg['name'])
-                        if devCfg['report_rssi'] == True:
-                            logger.debug('Reporting rssi for %s', devCfg['name'])
-                            logger.debug(decoded_packet)
+                        if devCfg['report_uid_rssi'] == True:
+                            logger.debug('%s.rssi %s', devCfg['name'], decoded_packet['rssi_ref'])
+                            sendstat_gauge('{}.rssi'.format(devCfg['name']),decoded_packet['rssi_ref'] )
                             #{'namespace': 'EDD1EBEAC04E5DEFA017', 'rssi_ref': -66, 'instance': 'DF0A6A74BFDD', 'type': 'eddystone', 'sub_type': 'uid', 'adstruct_bytes': 32}
                         else:
                             logger.debug('discarding rssi for %s', devCfg['name'])

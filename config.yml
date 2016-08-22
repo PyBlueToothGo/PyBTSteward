@@ -31,13 +31,13 @@ Beacons:
     default:
       enabled: false
       report_telemetry: false
-      report_telemetry_rate: false
+      report_telemetry_rate: true
       report_telemetry_uptime: false
       report_telemetry_voltage: true
       report_telemetry_temp: true
       report_telemetry_bytes: false
       report_uid_rate: false
-      report_rssi: false
+      report_uid_rssi: true
       native_temp_unit: 'c'
       output_temp_unit: 'f'
     devices:
