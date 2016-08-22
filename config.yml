@@ -22,15 +22,15 @@ Beacons:
       report_rssi: false
       native_temp_unit: 'c'
     devices:
-    - DF0A6A74BFDD:
-        name: 'barn_ext'
-        enabled: true
-        report_telemetry: true
-        report_rssi: true
-        native_temp_unit: 'c'
-    - E515AAE053F5:
-        name: 'workoutlandia'
-        enabled: true
+    DF0A6A74BFDD:
+      name: 'barn_ext'
+      enabled: true
+      report_telemetry: true
+      report_rssi: true
+      native_temp_unit: 'c'
+    E515AAE053F5:
+      name: 'workoutlandia'
+      enabled: true
   estimote:
       default:
         enabled: false

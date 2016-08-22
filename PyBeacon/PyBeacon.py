@@ -308,9 +308,15 @@ def onPacketFound(config, packet):
 #            logger.debug('            Event: {}'.format(data[1]))
             if dev_addr in cfg['Beacons']['eddystone']['devices']:
                 devCfg = cfg['Beacons']['eddystone']['devices'][dev_addr]
-                logger.info('RX Packet for {}'.format(devCfg['name']))
                 if devCfg['enabled'] == True:
                     decoded_packet = decode_eddystone(barray[13:])
+                    if decoded_packet['sub_type'] == 'tlm':
+                        logger.debug('RX Edy-tlm Packet for {}'.format(devCfg['name']))
+                    elif decoded_packet['sub_type'] == 'uid':
+                        logger.debug('RX Edy-uid Packet for {}'.format(devCfg['name']))
+                    else:
+                        logger.warn('Unknown Estimote packet for device {}: {}'.format(device_addr, decoded_packet))
+
                     #logger.info("Decoded [{}]: {}".format(device_addr, decoded_packet))
                 else:
                     logger.info('beacon {} disabled in cfg. Ignoring'.format(device_addr))
