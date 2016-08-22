@@ -39,6 +39,7 @@ import uuid
 from . import __version__
 from pprint import pprint
 from PyBeacon.wpl_cfg_parser import wpl_cfg
+from PyBeacon.wpl_stats import sendstat_gauge
 from PyBeacon.decode_eddystone import decode_eddystone
 from PyBeacon.decode_iBeacon import decode_iBeacon
 
@@ -312,8 +313,19 @@ def onPacketFound(config, packet):
                     decoded_packet = decode_eddystone(barray[13:])
                     if decoded_packet['sub_type'] == 'tlm':
                         logger.info('RX Edy-tlm Packet for {}'.format(devCfg['name']))
+                        if devCfg['report_telemetry'] == True:
+                            logger.info('Reporting telemetry for {}'.format(devCfg['name']))
+                        else:
+                            logger.info('discarding telemetry for {}'.format(devCfg['name']))
+
                     elif decoded_packet['sub_type'] == 'uid':
                         logger.info('RX Edy-uid Packet for {}'.format(devCfg['name']))
+                        if devCfg['report_rssi'] == True:
+                            logger.info('Reporting rssi for {}'.format(devCfg['name']))
+                        else:
+                            logger.info('discarding rssi for {}'.format(devCfg['name']))
+
+
                     else:
                         logger.warn('Unknown Estimote packet for device {}: {}'.format(device_addr, decoded_packet))
 
