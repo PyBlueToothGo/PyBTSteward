@@ -7,8 +7,8 @@ Logging:
   loglevel: 'INFO'
   mark: true
   mark_count: 12
-  list_devices_in_cfg: true
-  print_on_load: true
+  list_devices_in_cfg: false
+  print_on_load: false
 
 Reporting:
   statsd:
@@ -31,6 +31,12 @@ Beacons:
     default:
       enabled: false
       report_telemetry: false
+      report_telemetry_rate: false
+      report_telemetry_uptime: false
+      report_telemetry_voltage: true
+      report_telemetry_temp: true
+      report_telemetry_bytes: false
+      report_uid_rate: false
       report_rssi: false
       native_temp_unit: 'c'
     devices:
@@ -39,10 +45,10 @@ Beacons:
         enabled: true
         report_telemetry: true
         report_rssi: true
-        native_temp_unit: 'c'
       E515AAE053F5:
         name: 'workoutlandia'
         enabled: true
+        report_telemetry: true
   estimote:
     default:
       enabled: false

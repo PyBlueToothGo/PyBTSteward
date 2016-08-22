@@ -314,17 +314,34 @@ def onPacketFound(config, packet):
                     if decoded_packet['sub_type'] == 'tlm':
                         logger.debug('RX Edy-tlm Packet for %s', devCfg['name'])
                         if devCfg['report_telemetry'] == True:
-                            logger.info('Reporting telemetry for %s', devCfg['name'])
-                            logger.info(decoded_packet)
-                            #wpl_stats.sendstat_gauge('{}.{}'.format(devCfg['name']))
+                            logger.debug('Reporting telemetry for %s', devCfg['name'])
+                            #logger.info(decoded_packet)
+
+                            {'temp': 25.875, 'adv_cnt': 231264, 'vbatt': 6.108, 'tlm_version': 0, 'type': 'eddystone', 'sub_type': 'tlm', 'adstruct_bytes': 26, 'sec_cnt': 3345892.0}
+                            if devCfg['report_telemetry_rate'] == True:
+                                logger.info('%s.advCount %s', devCfg['name'], decoded_packet['adv_cnt'])
+                                #wpl_stats.sendstat_gauge('{}.advCount'.format(devCfg['name']),decoded_packet['adv_cnt'] )
+                            if devCfg['report_telemetry_uptime'] == True:
+                                logger.info('%s.uptime %s', devCfg['name'], decoded_packet['sec_cnt'])
+                                #wpl_stats.sendstat_gauge('{}.uptime'.format(devCfg['name']),decoded_packet['sec_cnt'] )
+                            if devCfg['report_telemetry_voltage'] == True:
+                                logger.info('%s.voltage %s', devCfg['name'], decoded_packet['vbatt'])
+                                #wpl_stats.sendstat_gauge('{}.voltage'.format(devCfg['name']),decoded_packet['vbatt'] )
+                            if devCfg['report_telemetry_temp'] == True:
+                                logger.info('%s.temp %s', devCfg['name'], decoded_packet['temp'])
+                                #wpl_stats.sendstat_gauge('{}.temp'.format(devCfg['name']),decoded_packet['temp'] )
+                            if devCfg['report_telemetry_bytes'] == True:
+                                logger.info('%s.bytes %s', devCfg['name'], decoded_packet['adstruct_bytes'])
+                                #wpl_stats.sendstat_gauge('{}.bytes'.format(devCfg['name']),decoded_packet['adstruct_bytes'] )
                         else:
                             logger.debug('discarding telemetry for %s', devCfg['name'])
 
                     elif decoded_packet['sub_type'] == 'uid':
                         logger.debug('RX Edy-uid Packet for %s', devCfg['name'])
                         if devCfg['report_rssi'] == True:
-                            logger.info('Reporting rssi for %s', devCfg['name'])
-                            logger.info(decoded_packet)
+                            logger.debug('Reporting rssi for %s', devCfg['name'])
+                            logger.debug(decoded_packet)
+                            #{'namespace': 'EDD1EBEAC04E5DEFA017', 'rssi_ref': -66, 'instance': 'DF0A6A74BFDD', 'type': 'eddystone', 'sub_type': 'uid', 'adstruct_bytes': 32}
                         else:
                             logger.debug('discarding rssi for %s', devCfg['name'])
 
