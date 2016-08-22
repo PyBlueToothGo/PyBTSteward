@@ -412,7 +412,7 @@ def main(conf=init()):
     if args.version:
         showVersion()
     else:
-        pprint.print(conf)
+        pprint(conf)
         subprocess.call(["sudo", "-v"])
         if args.terminate:
             stopAdvertising()
