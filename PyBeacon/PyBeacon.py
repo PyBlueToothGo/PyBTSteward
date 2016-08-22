@@ -291,6 +291,7 @@ def onPacketFound(config, packet):
         device_addr_type = data[6]
         if device_addr_type == 1:
             logger.debug('collecting mac addr from bytes 7-12')
+            dev_addr           = '{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}'.format(data[12],data[11],data[10],data[9],data[8],data[7])
             device_addr        = '{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}'.format(data[12],data[11],data[10],data[9],data[8],data[7])
             eddyPacketLength   = data[13]
             eddyAdvFrameLength = data[14]
@@ -301,12 +302,12 @@ def onPacketFound(config, packet):
             serviceDataLength  = data[21]
             frameType          = data[25]
 #            logger.debug('           Packet: {}'.format(packet))
-            logger.info('   Device Address: {}'.format(device_addr))
+#            logger.debug('   Device Address: {}'.format(device_addr))
 #            logger.debug('       PacketType: {}'.format(data[0]))
 #            logger.debug('serviceDataLength: {}'.format(data[21]))
 #            logger.debug('            Event: {}'.format(data[1]))
-            if cfg['Beacons']['eddystone']['devices'][device_addr]:
-                devCfg = cfg['Beacons']['eddystone']['devices'][device_addr]
+            if cfg['Beacons']['eddystone']['devices'][dev_addr]:
+                devCfg = cfg['Beacons']['eddystone']['devices'][dev_addr]
                 logger.info('RX Packet for {}'.format(devCfg['name']))
                 if devCfg['enabled'] == True:
                     decoded_packet = decode_eddystone(barray[13:])
