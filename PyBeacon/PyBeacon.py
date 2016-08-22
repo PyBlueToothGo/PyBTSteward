@@ -40,6 +40,7 @@ from . import __version__
 from pprint import pprint
 from PyBeacon.wpl_cfg_parser import wpl_cfg
 from PyBeacon.decode_eddystone import decode_eddystone
+from PyBeacon.decode_iBeacon import decode_iBeacon
 
 application_name = 'PyBeacon'
 version = __version__ + 'beta'
@@ -128,45 +129,6 @@ def ByteToHex(byteStr):
     #        hex.append( "%02X " % ord( aChar ) )
     #    return ''.join( hex ).strip()
     return ''.join(["%02X"%ord(x) for x in byteStr]).strip()
-
-def decode_ibeacon(ad_struct):
-    """Ad structure decoder for iBeacon
-    Returns a dictionary with the following fields if the ad structure is a
-    valid mfg spec iBeacon structure:
-    adstruct_bytes: <int> Number of bytes this ad structure consumed
-    type: <string> 'ibeacon' for Apple iBeacon
-    uuid: <string> UUID
-    major: <int> iBeacon Major
-    minor: <int> iBeacon Minor
-    rssi_ref: <int> Reference signal @ 1m in dBm
-    If this isn't a valid iBeacon structure, it returns a dict with these
-    fields:
-    adstruct_bytes: <int> Number of bytes this ad structure consumed
-    type: None for unknown
-    """
-    # Get the length of the ad structure (including the length byte)
-    adstruct_bytes = ord(ad_struct[0]) + 1
-    # Create the return object
-    ret = {'adstruct_bytes': adstruct_bytes, 'type': None}
-    # Is the length correct and is our data long enough?
-    if adstruct_bytes == 0x1B and adstruct_bytes <= len(ad_struct):
-      # Decode the ad structure assuming iBeacon format
-        iBeaconData = namedtuple('iBeaconData', 'adstruct_bytes adstruct_type mfg_id_low mfg_id_high ibeacon_id ibeacon_data_len uuid major minor rssi_ref')
-        bd = iBeaconData._make(struct.unpack('>BBBBBB16sHHb', ad_struct[:27]))
-        # Check whether all iBeacon specific values are correct
-        if bd.adstruct_bytes == 0x1A and bd.adstruct_type == 0xFF and \
-            bd.mfg_id_low == 0x4C and bd.mfg_id_high == 0x00 and \
-            bd.ibeacon_id == 0x02 and bd.ibeacon_data_len == 0x15:
-            # This is a valid iBeacon ad structure
-            # Fill in the return structure with the data we extracted
-            ret['type'] = 'ibeacon'
-            ret['uuid'] = str(uuid.UUID(bytes=bd.uuid))
-            ret['major'] = bd.major
-            ret['minor'] = bd.minor
-            ret['rssi_ref'] = bd.rssi_ref
-        # Return the object
-    return ret
-
 
 
 def encodeurl(url):
@@ -311,13 +273,6 @@ def onPacketFound(packet):
         hb = int(bs, 16)
         logger.debug("bs: {} hb: {}".format(bs, hb))
         barray.append(hb)
-#    barray = bytearray.fromhex(HexToByte(packet))
-#    barray = bytearray()
-#    barray.append(HexToByte(packet))
-#    foo = packet.split()
-#    barray.join('%02s'%s for s in foo)
-#    for b in packet.split():
-#        barray +='{}'.format(b)
     logger.debug('  data: {}'.format(data))
     logger.debug('barray: {}'.format(barray))
     if args.one:
@@ -335,29 +290,28 @@ def onPacketFound(packet):
         device_addr_type = data[6]
         if device_addr_type == 1:
             logger.debug('collecting mac addr from bytes 7-12')
-            device_addr = '{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}'.format(data[12],data[11],data[10],data[9],data[8],data[7])
-            eddyPacketLength = data[13]
+            device_addr        = '{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}'.format(data[12],data[11],data[10],data[9],data[8],data[7])
+            eddyPacketLength   = data[13]
             eddyAdvFrameLength = data[14]
-            eddyFlagsDatatype = data[15]
-            eddyFlagsData = data[16]
-            eddyLength     = data[17]
+            eddyFlagsDatatype  = data[15]
+            eddyFlagsData      = data[16]
+            eddyLength         = data[17]
             SvcUUIDdatatypeVal = data[18]
-            serviceDataLength = data[21]
-#        nameSpace=struct.unpack_from('10s',data, offset=2)
-#        instance=struct.unpack_from('6s',data, offset=12)
-            frameType = data[25]
-
-#        logger.info("first 20 bytes: {}".format(first20))
-            logger.debug('           Packet: {}'.format(packet))
-            logger.debug('   Device Address: {}'.format(device_addr))
-            logger.debug('       PacketType: {}'.format(data[0]))
-            logger.debug('serviceDataLength: {}'.format(data[21]))
-#        logger.debug('NameSpace: {}'.format(nameSpace))
-#        logger.debug('Instance: {}'.format(instance))
-            logger.debug('            Event: {}'.format(data[1]))
-            # Eddystone-URL
-            decoded_packet = decode_eddystone(barray[13:])
-            logger.info("Decoded [{}]: {}".format(device_addr, decoded_packet))
+            serviceDataLength  = data[21]
+            frameType          = data[25]
+#            logger.debug('           Packet: {}'.format(packet))
+#            logger.debug('   Device Address: {}'.format(device_addr))
+#            logger.debug('       PacketType: {}'.format(data[0]))
+#            logger.debug('serviceDataLength: {}'.format(data[21]))
+#            logger.debug('            Event: {}'.format(data[1]))
+            if device_addr in config['Beacons']['eddystone']['devices']:
+                devCfg = config['Beacons']['eddystone']['devices'][device_addr]
+                logger.info('RX Packet for {}'.format(devCfg['name']))
+                if devCfg['enabled'] == True:
+                    decoded_packet = decode_eddystone(barray[13:])
+                    #logger.info("Decoded [{}]: {}".format(device_addr, decoded_packet))
+                else:
+                    logger.info('beacon {} disabled in cfg. Ignoring'.format(device_addr))
         else:
             logger.warn('Unknown Device address Type: {} (byte[6])'.format(data[6]))
 

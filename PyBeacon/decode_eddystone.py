@@ -77,18 +77,18 @@ def decode_eddystone(ad_struct):
             ad_struct[4], ad_struct[5], ad_struct[6:7], ad_struct[8], \
             ad_struct[9], ad_struct[10:11], ad_struct[12]]))
 
-        logger.debug('{}'.format(ec))
-        logger.debug('          uuid: {:02X}'.format(ec.eddystone_uuid))
-        logger.debug('adstruct_bytes: {:02X}'.format(ec.adstruct_bytes))
-        logger.debug('     sd_length: {:02X}'.format(ec.sd_length))
-        logger.debug(' sd_flags_type: {:02X}'.format(ec.sd_flags_type))
-        logger.debug(' sd_flags_data: {:02X}'.format(ec.sd_flags_data))
-        logger.debug(' uuid_list_len: {:02X}'.format(ec.uuid_list_len))
-        logger.debug('   uuid_dt_val: {:02X}'.format(ec.uuid_dt_val))
-        logger.debug('      eddy_len: {:02X}'.format(ec.eddy_len))
-        logger.debug('       sd_type: {:02X}'.format(ec.sd_type))
-        logger.debug('         uuid2: {:02X}'.format(ec.eddy_uuid_2))
-        logger.debug('      sub_type: {:02X}'.format(ec.sub_type))
+#        logger.debug('{}'.format(ec))
+#        logger.debug('          uuid: {:02X}'.format(ec.eddystone_uuid))
+#        logger.debug('adstruct_bytes: {:02X}'.format(ec.adstruct_bytes))
+#        logger.debug('     sd_length: {:02X}'.format(ec.sd_length))
+#        logger.debug(' sd_flags_type: {:02X}'.format(ec.sd_flags_type))
+#        logger.debug(' sd_flags_data: {:02X}'.format(ec.sd_flags_data))
+#        logger.debug(' uuid_list_len: {:02X}'.format(ec.uuid_list_len))
+#        logger.debug('   uuid_dt_val: {:02X}'.format(ec.uuid_dt_val))
+#        logger.debug('      eddy_len: {:02X}'.format(ec.eddy_len))
+#        logger.debug('       sd_type: {:02X}'.format(ec.sd_type))
+#        logger.debug('         uuid2: {:02X}'.format(ec.eddy_uuid_2))
+#        logger.debug('      sub_type: {:02X}'.format(ec.sub_type))
         # Is this a valid Eddystone ad structure?
 
         if ec.eddystone_uuid == 0xFEAA and ec.sd_type == 0x16:
