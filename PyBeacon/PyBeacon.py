@@ -332,7 +332,7 @@ def onPacketFound(config, packet):
                                         _temp = CtoF(decoded_packet['temp'])
                                     else:
                                         _temp = FtoC(decoded_packet['temp'])
-                                    logger.info('Temp conversion performed %s: %s%s -> %s%s', devCfg['name'], decoded_packet['temp'], devCfg['native_temp_unit'], _temp, devCfg['output_temp_unit'])
+                                    logger.debug('Temp conversion performed %s: %s%s -> %s%s', devCfg['name'], decoded_packet['temp'], devCfg['native_temp_unit'], _temp, devCfg['output_temp_unit'])
                                 else:
                                     _temp = decoded_packet['temp']
                                 logger.debug('%s.temp %s', devCfg['name'], _temp)
@@ -460,7 +460,6 @@ def main(conf=init()):
     if args.version:
         showVersion()
     else:
-        pprint(conf)
         subprocess.call(["sudo", "-v"])
         if args.terminate:
             stopAdvertising()
