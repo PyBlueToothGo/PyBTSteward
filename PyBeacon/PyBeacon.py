@@ -306,7 +306,7 @@ def onPacketFound(config, packet):
 #            logger.debug('       PacketType: {}'.format(data[0]))
 #            logger.debug('serviceDataLength: {}'.format(data[21]))
 #            logger.debug('            Event: {}'.format(data[1]))
-            if cfg['Beacons']['eddystone']['devices'][dev_addr]:
+            if dev_addr in cfg['Beacons']['eddystone']['devices']:
                 devCfg = cfg['Beacons']['eddystone']['devices'][dev_addr]
                 logger.info('RX Packet for {}'.format(devCfg['name']))
                 if devCfg['enabled'] == True:
