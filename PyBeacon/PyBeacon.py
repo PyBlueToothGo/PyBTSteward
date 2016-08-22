@@ -359,6 +359,8 @@ def onPacketFound(config, packet):
                     #logger.info("Decoded [{}]: {}".format(device_addr, decoded_packet))
                 else:
                     logger.info('beacon {} disabled in cfg. Ignoring'.format(device_addr))
+            else:
+                logger.info('unknown eddy beacon found %s', device_addr)
         else:
             logger.warn('Unknown Device address Type: {} (byte[6])'.format(data[6]))
 
@@ -475,6 +477,7 @@ def main(conf=init()):
 
 if __name__ == "__main__":
     conf = init()
+    pyBState = {}
     if conf['Global']['debug']:
         logger.setLevel(logging.DEBUG)
     else:
