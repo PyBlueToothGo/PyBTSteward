@@ -22,13 +22,13 @@ Beacons:
       report_rssi: false
       native_temp_unit: 'c'
     devices:
-    - 'DF:0A:6A:74:BF:DD':
+    - DF:0A:6A:74:BF:DD:
         name: 'barn_ext'
         enabled: true
         report_telemetry: true
         report_rssi: true
         native_temp_unit: 'c'
-    - 'E5:15:AA:E0:53:F5':
+    - E5:15:AA:E0:53:F5:
         name: 'workoutlandia'
         enabled: true
   estimote:
