@@ -293,7 +293,6 @@ def onPacketFound(config, packet):
         device_addr_type = data[6]
         if device_addr_type == 1:
             logger.debug('collecting mac addr from bytes 7-12')
-            dev_addr           = '{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}'.format(data[12],data[11],data[10],data[9],data[8],data[7])
             device_addr        = '{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}'.format(data[12],data[11],data[10],data[9],data[8],data[7])
             eddyPacketLength   = data[13]
             eddyAdvFrameLength = data[14]
@@ -308,8 +307,8 @@ def onPacketFound(config, packet):
 #            logger.debug('       PacketType: {}'.format(data[0]))
 #            logger.debug('serviceDataLength: {}'.format(data[21]))
 #            logger.debug('            Event: {}'.format(data[1]))
-            if dev_addr in cfg['Beacons']['eddystone']['devices']:
-                devCfg = cfg['Beacons']['eddystone']['devices'][dev_addr]
+            if device_addr in cfg['Beacons']['eddystone']['devices']:
+                devCfg = cfg['Beacons']['eddystone']['devices'][device_addr]
                 if devCfg['enabled'] == True:
                     decoded_packet = decode_eddystone(barray[13:])
                     if decoded_packet['sub_type'] == 'tlm':

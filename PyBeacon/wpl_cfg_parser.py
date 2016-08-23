@@ -9,21 +9,25 @@ Who doesn't like Config Files.
 import yaml
 import yaml
 from pprint import pprint
-from PyBeacon.dict_utils import smerge_dicts
+from PyBeacon.dict_utils import smerge_dicts, merge_dict
 import logging
 logger = logging.getLogger(__name__)
 
-def wpl_cfg(cfg='config.yml'):
+def wpl_cfg(base_cfg='config.yml',custom_config='local_config.yml'):
     """Read in our config file and return a parsed configuration object"""
     _config_from_file = {}
-    with open(cfg) as f:
+    with open(base_cfg) as f:
         _config_from_file = yaml.load(f)
 
-        _config = _config_from_file.copy()
+
+    with open(custom_config) as c:
+        _custom_cfg = yaml.load(c)
+        _merged_config = merge_dict(_config_from_file, _custom_cfg)
+        _config = _merged_config.copy()
 
         _fattened_eddy_devices = {}
-        _default_eddy_attrs = _config_from_file['Beacons']['eddystone']['default'].copy()
-        _eddy_devices = _config_from_file['Beacons']['eddystone']['devices']
+        _default_eddy_attrs = _merged_config['Beacons']['eddystone']['default'].copy()
+        _eddy_devices = _merged_config['Beacons']['eddystone']['devices']
         for _eddy, _eddy_dict in _eddy_devices.items():
             _defaults = _default_eddy_attrs.copy()
             if _config_from_file['Logging']['list_devices_in_cfg']:
