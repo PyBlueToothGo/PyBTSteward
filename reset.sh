@@ -7,10 +7,12 @@ if [[ $(git branch |grep -c foo) -lt 1 ]]; then
   git branch foo
 fi
 if [[ `grep -q 'hcidump' /proc/[[:digit:]]*/cmdline; echo $?` > 0 ]]; then
-    echo "Hcidump commands still running. Might want to kill them."
+    echo "Hcidump commands still running. killing them."
+    sudo killall hcidump
 fi
 if [[ `grep -q 'hcitool' /proc/[[:digit:]]*/cmdline; echo $?` > 0 ]]; then
-    echo "Hcitool commands still running. Might want to kill them."
+    echo "Hcitool commands still running. killing them."
+    sudo killall hcitool
 fi
 >/var/log/pybeacon.log
 git checkout foo&& git reset --hard&& git branch -D master
