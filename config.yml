@@ -13,6 +13,7 @@ Logging:
 Reporting:
   statsd:
     enabled: true
+    loglevel: 'INFO'
     enabletcp: false
     host:    '127.0.0.1'
     port:    8125
