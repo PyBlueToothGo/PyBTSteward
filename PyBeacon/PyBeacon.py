@@ -42,7 +42,8 @@ from PyBeacon.wpl_cfg_parser import wpl_cfg
 from PyBeacon.wpl_stats import sendstat_gauge
 from PyBeacon.decode_eddystone import decode_eddystone
 from PyBeacon.decode_iBeacon import decode_iBeacon
-from PyBeacon.temp_utils import CtoF, FtoC
+from PyBeacon.converters import ByteToHex, CtoF, FtoC, HexToByte
+from PyBeacon.urltools import encodeurl, encodeMessage, decodeUrl, resolveUrl
 
 application_name = 'PyBeacon'
 version = __version__ + 'beta'
@@ -64,17 +65,17 @@ url = "http://wolfspyre.com"
 packettype = 'eddy_url'
 
 #
-schemes = [
-    "http://www.",
-    "https://www.",
-    "http://",
-    "https://",
-    ]
+#schemes = [
+#    "http://www.",
+#    "https://www.",
+#    "http://",
+#    "https://",
+#    ]
 
-extensions = [
-    ".com/", ".org/", ".edu/", ".net/", ".info/", ".biz/", ".gov/",
-    ".com", ".org", ".edu", ".net", ".info", ".biz", ".gov",
-    ]
+#extensions = [
+#    ".com/", ".org/", ".edu/", ".net/", ".info/", ".biz/", ".gov/",
+#    ".com", ".org", ".edu", ".net", ".info", ".biz", ".gov",
+#    ]
 
 parser = argparse.ArgumentParser(prog=application_name, description=__doc__)
 
@@ -83,9 +84,6 @@ parser.add_argument("-u", "--url", nargs='?', const=url, type=str, default=url,
 parser.add_argument('-s', '--scan', action='store_true', help='Scan for URLs.')
 parser.add_argument('-t', '--terminate', action='store_true',
                     help='Stop advertising URL.')
-#parser.add_argument('-p','--packettype', type=str, default=packettype,
-#                    help='Packet Type to scan for Supported Values: "eddy_url",
-#                     "eddy_tlm", "esti_a", "esti_b".')
 parser.add_argument('-o', '--one', action='store_true',
                     help='Scan one packet only.')
 parser.add_argument("-v", "--version", action='store_true',
@@ -101,157 +99,6 @@ args = parser.parse_args()
 # actual behavior
 # The local logger
 logger = logging.getLogger(__name__)
-
-#http://code.activestate.com/recipes/510399-byte-to-hex-and-hex-to-byte-string-conversion/
-def HexToByte(hexStr):
-    """
-    Convert a string hex byte values into a byte string. The Hex Byte values may
-    or may not be space separated.
-    """
-    # The list comprehension implementation is fractionally slower in this case
-    #
-    #    hexStr = ''.join( hexStr.split(" ") )
-    #    return ''.join( ["%c" % chr( int ( hexStr[i:i+2],16 ) ) \
-    #                                   for i in range(0, len( hexStr ), 2) ] )
-    bytez = []
-    hexStr = ''.join(hexStr.split(" "))
-    for i in range(0, len(hexStr), 2):
-        bytez.append(chr(int(hexStr[i:i+2], 16)))
-    return ''.join(bytez)
-def ByteToHex(byteStr):
-    """
-    Convert a byte string to it's hex string representation e.g. for output.
-    """
-
-    # Uses list comprehension which is a fractionally faster implementation than
-    # the alternative, more readable, implementation below
-    #
-    #    hex = []
-    #    for aChar in byteStr:
-    #        hex.append( "%02X " % ord( aChar ) )
-    #    return ''.join( hex ).strip()
-    return ''.join(["%02X"%ord(x) for x in byteStr]).strip()
-
-
-def encodeurl(url):
-    i = 0
-    data = []
-
-    for s in range(len(schemes)):
-        scheme = schemes[s]
-        if url.startswith(scheme):
-            data.append(s)
-            i += len(scheme)
-            break
-    else:
-        raise Exception("Invalid url scheme")
-
-    while i < len(url):
-        if url[i] == '.':
-            for e in range(len(extensions)):
-                expansion = extensions[e]
-                if url.startswith(expansion, i):
-                    data.append(e)
-                    i += len(expansion)
-                    break
-            else:
-                data.append(0x2E)
-                i += 1
-        else:
-            data.append(ord(url[i]))
-            i += 1
-
-    return data
-
-
-def encodeMessage(url):
-    encodedurl = encodeurl(url)
-    encodedurlLength = len(encodedurl)
-
-    logger.debug("Encoded url length: " + str(encodedurlLength))
-
-    if encodedurlLength > 18:
-        raise Exception("Encoded url too long (max 18 bytes)")
-
-    message = [
-        0x02,   # Flags length
-        0x01,   # Flags data type value
-        0x1a,   # Flags data
-
-        0x03,   # Service UUID length
-        0x03,   # Service UUID data type value
-
-        0xaa,   # 16-bit Eddystone UUID
-        0xfe,   # 16-bit Eddystone UUID
-
-        5 + len(encodedurl), # Service Data length
-        0x16,   # Service Data data type value
-        0xaa,   # 16-bit Eddystone UUID
-        0xfe,   # 16-bit Eddystone UUID
-        0x10,   # Eddystone-url frame type
-        0xed,   # txpower
-        ]
-
-    message += encodedurl
-
-    return message
-
-def decodeUrl(encodedUrl):
-    """
-    Decode a url encoded with the Eddystone (or UriBeacon) URL encoding scheme
-    """
-
-    decodedUrl = schemes[encodedUrl[0]]
-    for c in encodedUrl[1:]:
-        if c <= 0x20:
-            decodedUrl += extensions[c]
-        else:
-            decodedUrl += chr(c)
-
-    return decodedUrl
-
-
-def resolveUrl(url):
-    """
-    Follows redirects until the final url is found.
-    """
-
-    try:
-        if sys.version_info > (3, 0):
-            import http.client
-            import urllib.parse
-
-            parsed = urllib.parse.urlsplit(url)
-
-            conn = None
-            if parsed.scheme == "https":
-                conn = http.client.HTTPSConnection(parsed.netloc)
-            elif parsed.scheme == "http":
-                conn = http.client.HTTPConnection(parsed.netloc)
-
-            path = parsed.path
-            if parsed.query:
-                path += "&" + parsed.query
-
-            conn.request("HEAD", path)
-            response = conn.getresponse()
-        else:
-            import httplib
-            import urlparse
-
-            parsed = urlparse.urlparse(url)
-            h = httplib.HTTPConnection(parsed.netloc)
-            h.request('HEAD', parsed.path)
-            response = h.getresponse()
-
-        if response.status >= 300 and response.status < 400:
-            return resolveUrl(response.getheader("Location"))
-        else:
-            return url
-
-    except:
-        return url
-
 
 def onUrlFound(url):
     """

@@ -13,8 +13,9 @@ import PyBeacon.wpl_log
 from PyBeacon.wpl_cfg_parser import wpl_cfg
 from statsd import StatsClient, TCPStatsClient
 
-logger = logging.getLogger(__name__)
+
 conf = wpl_cfg()
+logger = logging.getLogger(__name__, loglevel=conf['Reporting']['statsd']['loglevel'])
 enable    = conf['Reporting']['statsd']['enabled']
 enableTCP = conf['Reporting']['statsd']['enabletcp']
 host      = conf['Reporting']['statsd']['host']
