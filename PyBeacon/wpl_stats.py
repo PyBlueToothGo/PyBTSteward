@@ -15,7 +15,8 @@ from statsd import StatsClient, TCPStatsClient
 
 
 conf = wpl_cfg()
-logger = logging.getLogger(__name__, loglevel=conf['Reporting']['statsd']['loglevel'])
+logger = logging.getLogger(__name__)
+logger.setLevel(conf['Reporting']['statsd']['loglevel'])
 enable    = conf['Reporting']['statsd']['enabled']
 enableTCP = conf['Reporting']['statsd']['enabletcp']
 host      = conf['Reporting']['statsd']['host']

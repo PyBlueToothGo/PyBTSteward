@@ -1,19 +1,20 @@
 #!/bin/bash
 source bin/activate
-pip uninstall PyBeacon -y;
+LOG=reset.log
+>${LOG}
+pip uninstall PyBeacon -y >${LOG} $2>&1;
 if [[ -f local_config.yml ]]; then
   LOCALCONFIG=true
   echo 'backing up local_config'
   cp local_config.yml /tmp/
 fi
 
-git clean -df
-git reset --hard
-if [[ $(git branch |grep -c foo) -lt 1 ]]; then
-  git branch foo
-else
-  git branch -D foo && git branch foo
+git clean -df >>${LOG} $2>&1
+git reset --hard >>${LOG} $2>&1
+if [[ $(git branch |grep -c foo) -gt 0 ]]; then
+  git branch -D foo >>${LOG} $2>&1
 fi
+git branch foo
 
 if [[ `grep -q 'hcidump' /proc/[[:digit:]]*/cmdline; echo $?` > 0 ]]; then
     echo "Hcidump commands still running. killing them."
@@ -24,8 +25,15 @@ if [[ `grep -q 'hcitool' /proc/[[:digit:]]*/cmdline; echo $?` > 0 ]]; then
     sudo killall hcitool
 fi
 >/var/log/pybeacon.log
-git checkout foo&& git reset --hard&& git branch -D master
-git fetch; git checkout master&&virtualenv --python=python3 ../PyBeacon&&. bin/activate&& pip install -r requirements.txt && pip install .
+git checkout foo >>${LOG} $2>&1 && git reset --hard >>${LOG} $2>&1 &&
+git branch -D master
+git fetch ; git checkout master
+echo 'Creating virtualenv'
+virtualenv --python=python3 ../PyBeacon >>${LOG} $2>&1 &&
+echo 'Settin up PyBeacon'
+. bin/activate >>${LOG} $2>&1 && pip install -r requirements.txt >>${LOG} $2>&1 &&
+echo 'Pip'
+pip install . >>${LOG} $2>&1
 if [[ $LOCALCONFIG == true ]]; then
     echo "restoring local config"
     cp /tmp/local_config.yml .

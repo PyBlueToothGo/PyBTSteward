@@ -12,7 +12,7 @@ Who doesn't like log.
 import logging
 import time
 from PyBeacon.wpl_cfg_parser import wpl_cfg
-
+#https://docs.python.org/2/library/logging.html#levels
 conf = wpl_cfg()
 logging.Formatter.converter = time.localtime
 logging.Formatter.default_time_format = '%Y-%m-%dT%H:%M:%S'
