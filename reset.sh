@@ -25,4 +25,12 @@ if [[ `grep -q 'hcitool' /proc/[[:digit:]]*/cmdline; echo $?` > 0 ]]; then
 fi
 >/var/log/pybeacon.log
 git checkout foo&& git reset --hard&& git branch -D master
-git fetch; git checkout master&&virtualenv --python=python3 ../PyBeacon&&. bin/activate&& pip install -r requirements.txt && pip install .&& PyBeacon -s
+git fetch; git checkout master&&virtualenv --python=python3 ../PyBeacon&&. bin/activate&& pip install -r requirements.txt && pip install .
+if [[ $LOCALCONFIG == true ]]; then
+    echo "restoring local config"
+    cp /tmp/local_config.yml .
+fi
+echo 'sleeping for 2 seconds to give you time to interrupt me before I start PyBeacon'
+sleep 1
+echo 'just kidding. too slow charlie.'
+PyBeacon -s
