@@ -17,6 +17,7 @@ import uuid
 from . import __version__
 from PyBeacon.wpl_cfg_parser import wpl_cfg
 logger = logging.getLogger(__name__)
+logger.setLevel(conf['Logging']['decode_eddy_loglevel']['loglevel'])
 
 def decode_eddystone(ad_struct):
     """Ad structure decoder for Eddystone
@@ -54,8 +55,8 @@ def decode_eddystone(ad_struct):
         length = ord(ad_struct[0]) + 1
         _collectedAs = 'str'
     #adstruct_bytes = ord(ad_struct[0]) + 1
-    logger.debug('Length from byte[0]: {} ({})'.format(length,_collectedAs))
-    logger.debug('Length of ad_struct: {}'.format(len(ad_struct)))
+    logger.debug('Length from byte[0]: %s (%s)', length, _collectedAs)
+    logger.debug('Length of ad_struct: %s', len(ad_struct))
     adstruct_bytes = length
     # Create the return object
     ret = {'adstruct_bytes': adstruct_bytes, 'type': None}

@@ -1,7 +1,9 @@
 Global:
   debug: false
-  interval: 10
-
+  sleep_time: 5
+  scan_duration: 10
+  maintain_statefile: true
+  statefile: '/tmp/statefile.txt'
 Logging:
   logfile: '/var/log/pybeacon.log'
   loglevel: 'INFO'
@@ -9,6 +11,7 @@ Logging:
   mark_count: 12
   list_devices_in_cfg: false
   print_on_load: false
+  decode_eddy_loglevel: 'INFO'
 
 Reporting:
   statsd:

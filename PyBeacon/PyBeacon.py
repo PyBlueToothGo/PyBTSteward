@@ -116,6 +116,7 @@ def onPacketFound(config, packet):
     """
     cfg = config
     _packetstring = packet
+    pyBState['packets_found']+1
     data = bytearray.fromhex(packet)
     barray = bytearray()
     #logger.debug('packet: {}'.format(packet))
@@ -138,6 +139,7 @@ def onPacketFound(config, packet):
         event            = data[1]
         packetLength     = data[2]
         device_addr_type = data[6]
+        pyBState['packets_found']['eddystone']+1
         if device_addr_type == 1:
             logger.debug('collecting mac addr from bytes 7-12')
             device_addr        = '{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}'.format(data[12],data[11],data[10],data[9],data[8],data[7])
@@ -156,9 +158,12 @@ def onPacketFound(config, packet):
 #            logger.debug('            Event: {}'.format(data[1]))
             if device_addr in cfg['Beacons']['eddystone']['devices']:
                 devCfg = cfg['Beacons']['eddystone']['devices'][device_addr]
+                pyBState['packets_found']['eddystone'][devCfg['name']]+1
                 if devCfg['enabled'] == True:
                     decoded_packet = decode_eddystone(barray[13:])
                     if decoded_packet['sub_type'] == 'tlm':
+                        pyBState['packets_found']['eddystone'][devCfg['name']]['tlm']+1
+                        pyBState['packets_found']['eddystone'][devCfg['name']]['tlm']['decoded'] = decoded_packet
                         logger.debug('RX Edy-tlm Packet for %s', devCfg['name'])
                         if devCfg['report_telemetry'] == True:
                             logger.debug('Reporting telemetry for %s', devCfg['name'])
@@ -190,22 +195,27 @@ def onPacketFound(config, packet):
                             logger.debug('discarding telemetry for %s', devCfg['name'])
 
                     elif decoded_packet['sub_type'] == 'uid':
+                        pyBState['packets_found']['eddystone'][devCfg['name']]['uid']+1
+                        pyBState['packets_found']['eddystone'][devCfg['name']]['uid']['decoded'] = decoded_packet
                         logger.debug('RX Edy-uid Packet for %s', devCfg['name'])
                         if devCfg['report_uid_rssi'] == True:
                             logger.debug('%s.rssi %s', devCfg['name'], decoded_packet['rssi_ref'])
                             sendstat_gauge('{}.rssi'.format(devCfg['name']),decoded_packet['rssi_ref'] )
                             #{'namespace': 'EDD1EBEAC04E5DEFA017', 'rssi_ref': -66, 'instance': 'DF0A6A74BFDD', 'type': 'eddystone', 'sub_type': 'uid', 'adstruct_bytes': 32}
                         else:
-                            logger.debug('discarding rssi for %s', devCfg['name'])
+                            logger.debug('discarding uid for %s', devCfg['name'])
 
 
                     else:
-                        logger.warn('Unknown Estimote packet for device {}: {}'.format(device_addr, decoded_packet))
+                        pyBState['packets_found']['eddystone'][devCfg['name']]['unknown']+1
+                        logger.warn('Unknown Eddystone packet for device {}: {}'.format(device_addr, decoded_packet))
 
                     #logger.info("Decoded [{}]: {}".format(device_addr, decoded_packet))
                 else:
+                    pyBState['packets_found']['eddystone'][devCfg['name']]['disabled']+1
                     logger.info('beacon {} disabled in cfg. Ignoring'.format(device_addr))
             else:
+                pyBState['packets_found']['eddystone']['unknown_beacon']
                 logger.info('unknown eddy beacon found %s', device_addr)
         else:
             logger.warn('Unknown Device address Type: {} (byte[6])'.format(data[6]))
@@ -216,11 +226,14 @@ def onPacketFound(config, packet):
 
     # UriBeacon
     elif len(data) >= 20 and data[19] == 0xd8 and data[20] == 0xfe:
+        pyBState['packets_found']['uribeacon']+1
+
         serviceDataLength = data[21]
         logger.debug("UriBeacon")
         onUrlFound(decodeUrl(data[27:22 + serviceDataLength]))
 
     else:
+        pyBState['packets_found']['unknown']+1
         logger.debug("Unknown beacon type")
 
 def scan(duration=None):
@@ -315,9 +328,15 @@ def main(conf=init()):
             scan(3)
         elif args.scan:
             while True:
-                scan(conf['Global']['interval'])
+                if config['Global']['maintain_statefile'] == True
+                    with open(conf['Global']['statefile'], 'a+') as statefile:
+                        statefile.seek(0)
+                        statefile = yaml.dump(pyBState)
+                        file.close(statefile)
+                pyBstate = {}
+                scan(conf['Global']['scan_duration'])
                 logger.info('Sleeping...')
-                time.sleep(conf['Global']['interval'])
+                time.sleep(conf['Global']['sleep_time'])
         else:
             advertise(args.url)
 
