@@ -24,18 +24,19 @@ https://github.com/wolfspyre/py-decode-beacon
 import argparse
 import logging
 import os
+import PyBeacon.wpl_cfg_parser
+import PyBeacon.wpl_log
+import PyBeacon.wpl_stats
 import re
 import signal
 import struct
 import subprocess
 import sys
 import time
-import PyBeacon.wpl_cfg_parser
-import PyBeacon.wpl_log
-import PyBeacon.wpl_stats
+import uuid
+import yaml
 import bluetooth._bluetooth as bluez
 from collections import namedtuple
-import uuid
 from . import __version__
 from pprint import pprint
 from PyBeacon.wpl_cfg_parser import wpl_cfg
@@ -110,13 +111,18 @@ def onUrlFound(__url):
 
 foundPackets = set()
 
-def onPacketFound(config, packet):
+def onPacketFound(state, packet):
     """
     Called by the scan function for each beacon packets found.
     """
-    cfg = config
+    cfg = state['conf']
+    pyBState = state
     _packetstring = packet
-    pyBState['packets_found']+1
+    if not 'packets' in pyBState:
+        pyBState['packets'] = {}
+        pyBState['packets']['found'] = 1
+    else:
+        pyBState['packets']['found'] +=1
     data = bytearray.fromhex(packet)
     barray = bytearray()
     #logger.debug('packet: {}'.format(packet))
@@ -139,7 +145,12 @@ def onPacketFound(config, packet):
         event            = data[1]
         packetLength     = data[2]
         device_addr_type = data[6]
-        pyBState['packets_found']['eddystone']+1
+        if not 'eddystone' in pyBState['packets']:
+            pyBState['packets']['eddystone'] = {}
+            pyBState['packets']['eddystone']['devices'] = {}
+            pyBState['packets']['eddystone']['count'] = 1
+        else:
+            pyBState['packets']['eddystone']['count'] += 1
         if device_addr_type == 1:
             logger.debug('collecting mac addr from bytes 7-12')
             device_addr        = '{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}'.format(data[12],data[11],data[10],data[9],data[8],data[7])
@@ -158,12 +169,18 @@ def onPacketFound(config, packet):
 #            logger.debug('            Event: {}'.format(data[1]))
             if device_addr in cfg['Beacons']['eddystone']['devices']:
                 devCfg = cfg['Beacons']['eddystone']['devices'][device_addr]
-                pyBState['packets_found']['eddystone'][devCfg['name']]+1
+                if not devCfg['name'] in pyBState['packets']['eddystone']['devices']:
+                    pyBState['packets']['eddystone']['devices'][devCfg['name']] = {'count': 1,'tlm': {'count':0,'decoded': {}},'uid':{'count':0,'decoded': {}}}
+                else:
+                    pyBState['packets']['eddystone']['devices'][devCfg['name']]['count'] += 1
                 if devCfg['enabled'] == True:
-                    decoded_packet = decode_eddystone(barray[13:])
+                    decoded_packet = decode_eddystone(pyBState, barray[13:])
                     if decoded_packet['sub_type'] == 'tlm':
-                        pyBState['packets_found']['eddystone'][devCfg['name']]['tlm']+1
-                        pyBState['packets_found']['eddystone'][devCfg['name']]['tlm']['decoded'] = decoded_packet
+                        if not 'tlm' in pyBState['packets']['eddystone']['devices'][devCfg['name']]:
+                            pyBState['packets']['eddystone']['devices'][devCfg['name']]['tlm'] = {'count':1, 'decoded':{}}
+                        else:
+                            pyBState['packets']['eddystone']['devices'][devCfg['name']]['tlm']['count'] += 1
+                        pyBState['packets']['eddystone']['devices'][devCfg['name']]['tlm']['decoded'] = decoded_packet
                         logger.debug('RX Edy-tlm Packet for %s', devCfg['name'])
                         if devCfg['report_telemetry'] == True:
                             logger.debug('Reporting telemetry for %s', devCfg['name'])
@@ -195,8 +212,11 @@ def onPacketFound(config, packet):
                             logger.debug('discarding telemetry for %s', devCfg['name'])
 
                     elif decoded_packet['sub_type'] == 'uid':
-                        pyBState['packets_found']['eddystone'][devCfg['name']]['uid']+1
-                        pyBState['packets_found']['eddystone'][devCfg['name']]['uid']['decoded'] = decoded_packet
+                        if not 'uid' in pyBState['packets']['eddystone']['devices'][devCfg['name']]:
+                            pyBState['packets']['eddystone']['devices'][devCfg['name']]['uid'] = {'count':1,'decoded':{}}
+                        else:
+                            pyBState['packets']['eddystone']['devices'][devCfg['name']]['uid']['count']+=1
+                        pyBState['packets']['eddystone']['devices'][devCfg['name']]['uid']['decoded'] = decoded_packet
                         logger.debug('RX Edy-uid Packet for %s', devCfg['name'])
                         if devCfg['report_uid_rssi'] == True:
                             logger.debug('%s.rssi %s', devCfg['name'], decoded_packet['rssi_ref'])
@@ -207,18 +227,21 @@ def onPacketFound(config, packet):
 
 
                     else:
-                        pyBState['packets_found']['eddystone'][devCfg['name']]['unknown']+1
+                        if not 'unknown' in pyBState['packets']['eddystone']['devices'][devCfg['name']]:
+                            pyBState['packets']['eddystone']['devices'][devCfg['name']]['unknown'] = {'count':1,'decoded':{}}
+                        else:
+                            pyBState['packets']['eddystone']['devices'][devCfg['name']]['unknown']+=1
                         logger.warn('Unknown Eddystone packet for device {}: {}'.format(device_addr, decoded_packet))
 
                     #logger.info("Decoded [{}]: {}".format(device_addr, decoded_packet))
                 else:
-                    pyBState['packets_found']['eddystone'][devCfg['name']]['disabled']+1
+                    pyBState['packets_found']['eddystone'][devCfg['name']]['disabled']+=1
                     logger.info('beacon {} disabled in cfg. Ignoring'.format(device_addr))
             else:
                 pyBState['packets_found']['eddystone']['unknown_beacon']
                 logger.info('unknown eddy beacon found %s', device_addr)
         else:
-            logger.warn('Unknown Device address Type: {} (byte[6])'.format(data[6]))
+            logger.warn('Unknown Device address Type: %s (byte[6])',data[6])
 
 #https://github.com/google/eddystone/blob/master/eddystone-tlm/tlm-plain.md
 #https://docs.python.org/3/library/struct.html
@@ -226,23 +249,29 @@ def onPacketFound(config, packet):
 
     # UriBeacon
     elif len(data) >= 20 and data[19] == 0xd8 and data[20] == 0xfe:
-        pyBState['packets_found']['uribeacon']+1
+        if not 'uriBeacon' in pyBState['packets']:
+            pyBState['packets']['uriBeacon'] = {'count': 1,'devices': {}}
+        else:
+            pyBState['packets']['uriBeacon']['count'] +=1
 
         serviceDataLength = data[21]
         logger.debug("UriBeacon")
         onUrlFound(decodeUrl(data[27:22 + serviceDataLength]))
 
     else:
-        pyBState['packets_found']['unknown']+1
+        if not 'unknown' in pyBState['packets']:
+            pyBState['packets']['unknown'] = {'count': 1,'devices': {}}
+        else:
+            pyBState['packets']['unknown']['count'] +=1
         logger.debug("Unknown beacon type")
 
-def scan(duration=None):
+def scan(pyBState, duration=None):
     """
     Scan for beacons. This function scans for [duration] seconds. If duration
     is set to None, it scans until interrupted.
     """
     #Re-Check the config in case it changed.
-    config = wpl_cfg()
+    config = pyBState['conf']
     logger.info("Scanning...")
     if config['Logging']['list_devices_in_cfg'] == True:
         for bcn in config['Beacons']['eddystone']['devices']:
@@ -261,10 +290,10 @@ def scan(duration=None):
         for line in dump.stdout:
             line = line.decode()
             if line.startswith("> "):
-                if packet: onPacketFound(config, packet)
+                if packet: onPacketFound(pyBState, packet)
                 packet = line[2:].strip()
             elif line.startswith("< "):
-                if packet: onPacketFound(config, packet)
+                if packet: onPacketFound(pyBState, packet)
                 packet = None
             else:
                 if packet: packet += " " + line.strip()
@@ -321,6 +350,7 @@ def main(conf=init()):
     if args.version:
         showVersion()
     else:
+        pyBState = {}
         subprocess.call(["sudo", "-v"])
         if args.terminate:
             stopAdvertising()
@@ -328,13 +358,15 @@ def main(conf=init()):
             scan(3)
         elif args.scan:
             while True:
-                if config['Global']['maintain_statefile'] == True:
+                pyBState['conf']=conf
+                if conf['Global']['maintain_statefile'] == True:
                     with open(conf['Global']['statefile'], 'a+') as statefile:
                         statefile.seek(0)
-                        statefile = yaml.dump(pyBState)
-                        file.close(statefile)
-                pyBstate = {}
-                scan(conf['Global']['scan_duration'])
+                        statefile.write(yaml.dump(pyBState))
+                        statefile.close()
+                pyBState = {}
+                pyBState['conf']=conf
+                scan(pyBState, conf['Global']['scan_duration'])
                 logger.info('Sleeping...')
                 time.sleep(conf['Global']['sleep_time'])
         else:
@@ -342,7 +374,6 @@ def main(conf=init()):
 
 if __name__ == "__main__":
     conf = init()
-    pyBState = {}
     if conf['Global']['debug']:
         logger.setLevel(logging.DEBUG)
     else:

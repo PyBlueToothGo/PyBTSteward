@@ -17,9 +17,11 @@ import uuid
 from . import __version__
 from PyBeacon.wpl_cfg_parser import wpl_cfg
 logger = logging.getLogger(__name__)
-logger.setLevel(conf['Logging']['decode_eddy_loglevel']['loglevel'])
 
-def decode_eddystone(ad_struct):
+def decode_eddystone(state, ad_struct):
+    config = state['conf']
+    logger.setLevel(config['Logging']['decode_eddy_loglevel']['loglevel'])
+
     """Ad structure decoder for Eddystone
   Returns a dictionary with the following fields if the ad structure is a
   valid mfg spec Eddystone structure:

@@ -7,7 +7,6 @@ Who doesn't like Config Files.
 
 '''
 import yaml
-import yaml
 from pprint import pprint
 from PyBeacon.dict_utils import smerge_dicts, merge_dict
 import logging
