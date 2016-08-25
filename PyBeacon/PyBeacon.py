@@ -100,13 +100,13 @@ args = parser.parse_args()
 # The local logger
 logger = logging.getLogger(__name__)
 
-def onUrlFound(url):
+def onUrlFound(__url):
     """
     Called by onPacketFound, if the packet contains a url.
     """
 
-    url = resolveUrl(url)
-    logger.info(url)
+    _url_ = resolveUrl(_url)
+    logger.info(_url_)
 
 foundPackets = set()
 
@@ -328,7 +328,7 @@ def main(conf=init()):
             scan(3)
         elif args.scan:
             while True:
-                if config['Global']['maintain_statefile'] == True
+                if config['Global']['maintain_statefile'] == True:
                     with open(conf['Global']['statefile'], 'a+') as statefile:
                         statefile.seek(0)
                         statefile = yaml.dump(pyBState)
