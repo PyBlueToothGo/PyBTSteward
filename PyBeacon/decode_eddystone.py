@@ -15,11 +15,12 @@ import PyBeacon.wpl_stats
 import bluetooth._bluetooth as bluez
 import uuid
 from . import __version__
+from pprint import pprint
 from PyBeacon.wpl_cfg_parser import wpl_cfg
 logger = logging.getLogger(__name__)
 
 def decode_eddystone(state, config, ad_struct):
-    logger.setLevel(config['Logging']['decode_eddy_loglevel']['loglevel'])
+    logger.setLevel(config['Logging']['decode_eddy_loglevel'])
 
     """Ad structure decoder for Eddystone
   Returns a dictionary with the following fields if the ad structure is a
