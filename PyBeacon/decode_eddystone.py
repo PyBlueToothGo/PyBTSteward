@@ -18,8 +18,7 @@ from . import __version__
 from PyBeacon.wpl_cfg_parser import wpl_cfg
 logger = logging.getLogger(__name__)
 
-def decode_eddystone(state, ad_struct):
-    config = state['conf']
+def decode_eddystone(state, config, ad_struct):
     logger.setLevel(config['Logging']['decode_eddy_loglevel']['loglevel'])
 
     """Ad structure decoder for Eddystone

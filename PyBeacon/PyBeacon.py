@@ -111,11 +111,12 @@ def onUrlFound(__url):
 
 foundPackets = set()
 
-def onPacketFound(state, packet):
+def onPacketFound(state, conf, packet):
     """
     Called by the scan function for each beacon packets found.
     """
-    cfg = state['conf']
+    #cfg = state['conf']
+    cfg = conf
     pyBState = state
     _packetstring = packet
     if not 'packets' in pyBState:
@@ -265,13 +266,12 @@ def onPacketFound(state, packet):
             pyBState['packets']['unknown']['count'] +=1
         logger.debug("Unknown beacon type")
 
-def scan(pyBState, duration=None):
+def scan(state, config, duration=None):
     """
     Scan for beacons. This function scans for [duration] seconds. If duration
     is set to None, it scans until interrupted.
     """
     #Re-Check the config in case it changed.
-    config = pyBState['conf']
     logger.info("Scanning...")
     if config['Logging']['list_devices_in_cfg'] == True:
         for bcn in config['Beacons']['eddystone']['devices']:
@@ -290,10 +290,10 @@ def scan(pyBState, duration=None):
         for line in dump.stdout:
             line = line.decode()
             if line.startswith("> "):
-                if packet: onPacketFound(pyBState, packet)
+                if packet: onPacketFound(state, config, packet)
                 packet = line[2:].strip()
             elif line.startswith("< "):
-                if packet: onPacketFound(pyBState, packet)
+                if packet: onPacketFound(state, config, packet)
                 packet = None
             else:
                 if packet: packet += " " + line.strip()
@@ -358,15 +358,15 @@ def main(conf=init()):
             scan(3)
         elif args.scan:
             while True:
-                pyBState['conf']=conf
                 if conf['Global']['maintain_statefile'] == True:
                     with open(conf['Global']['statefile'], 'a+') as statefile:
                         statefile.seek(0)
+                        statefile.write(yaml.dump(conf))
+                        statefile.write('##########')
                         statefile.write(yaml.dump(pyBState))
                         statefile.close()
                 pyBState = {}
-                pyBState['conf']=conf
-                scan(pyBState, conf['Global']['scan_duration'])
+                scan(pyBState, conf, conf['Global']['scan_duration'])
                 logger.info('Sleeping...')
                 time.sleep(conf['Global']['sleep_time'])
         else:
