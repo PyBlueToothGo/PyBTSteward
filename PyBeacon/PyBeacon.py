@@ -366,9 +366,9 @@ def main(conf=init()):
                         statefile.write(yaml.dump(pyBState))
                         statefile.close()
                 if pyBState:
-                    sendstat_counter(PyBeacon['packets']['eddystone'], pyBState['packets']['eddystone']['count'], conf['Global']['scan_duration'])
-                    sendstat_counter(PyBeacon['packets']['found'], pyBState['packets']['found'], conf['Global']['scan_duration'])
-                    sendstat_counter(PyBeacon['packets']['unknown'], pyBState['packets']['unknown']['count'], conf['Global']['scan_duration'])
+                    sendstat_counter(PyBState['packets']['eddystone'], pyBState['packets']['eddystone']['count'], conf['Global']['scan_duration'])
+                    sendstat_counter(PyBState['packets']['found'], pyBState['packets']['found'], conf['Global']['scan_duration'])
+                    sendstat_counter(PyBState['packets']['unknown'], pyBState['packets']['unknown']['count'], conf['Global']['scan_duration'])
                     for device in pyBState['packets']['eddystone']['devices'].each:
                         logger.info('counts for %s: %s [%s telem, %s uid]', device, device['count'], device['tlm']['count'], device['uid']['count'] )
 
