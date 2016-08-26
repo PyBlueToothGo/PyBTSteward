@@ -373,6 +373,8 @@ def main(conf=init()):
                         logger.info('counts for %s: %s [%s telem, %s uid]', device, device['count'], device['tlm']['count'], device['uid']['count'] )
                 except KeyError:
                     logger.debug('not sending stats as we got a KeyError from the object')
+                except NameError:
+                    logger.debug('not sending stats as we got no object')
 
                 else:
                     pyBState = {}
