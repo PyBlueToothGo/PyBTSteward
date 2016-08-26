@@ -175,7 +175,7 @@ def onPacketFound(state, conf, packet):
                 else:
                     pyBState['packets']['eddystone']['devices'][devCfg['name']]['count'] += 1
                 if devCfg['enabled'] == True:
-                    decoded_packet = decode_eddystone(pyBState, barray[13:])
+                    decoded_packet = decode_eddystone(pyBState, cfg, barray[13:])
                     if decoded_packet['sub_type'] == 'tlm':
                         if not 'tlm' in pyBState['packets']['eddystone']['devices'][devCfg['name']]:
                             pyBState['packets']['eddystone']['devices'][devCfg['name']]['tlm'] = {'count':1, 'decoded':{}}
