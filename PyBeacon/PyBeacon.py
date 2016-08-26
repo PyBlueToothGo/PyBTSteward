@@ -365,7 +365,7 @@ def main(conf=init()):
                         statefile.write('##########')
                         statefile.write(yaml.dump(pyBState))
                         statefile.close()
-                if pyBState:
+                if pyBState != False:
                     sendstat_counter(PyBState['packets']['eddystone'], pyBState['packets']['eddystone']['count'], conf['Global']['scan_duration'])
                     sendstat_counter(PyBState['packets']['found'], pyBState['packets']['found'], conf['Global']['scan_duration'])
                     sendstat_counter(PyBState['packets']['unknown'], pyBState['packets']['unknown']['count'], conf['Global']['scan_duration'])
