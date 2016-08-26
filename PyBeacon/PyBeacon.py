@@ -40,7 +40,7 @@ from collections import namedtuple
 from . import __version__
 from pprint import pprint
 from PyBeacon.wpl_cfg_parser import wpl_cfg
-from PyBeacon.wpl_stats import sendstat_gauge
+from PyBeacon.wpl_stats import sendstat_gauge, sendstat_counter
 from PyBeacon.decode_eddystone import decode_eddystone
 from PyBeacon.decode_iBeacon import decode_iBeacon
 from PyBeacon.converters import ByteToHex, CtoF, FtoC, HexToByte
