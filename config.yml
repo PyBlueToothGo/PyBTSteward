@@ -35,6 +35,8 @@ Beacons:
   eddystone:
     default:
       enabled: false
+      log_raw_packet: false
+      log_raw_packet_level: 'debug'
       report_telemetry: false
       report_telemetry_rate: true
       report_telemetry_uptime: false
