@@ -175,6 +175,10 @@ def onPacketFound(state, conf, packet):
                 else:
                     pyBState['packets']['eddystone']['devices'][devCfg['name']]['count'] += 1
                 if devCfg['enabled'] == True:
+                    if devCfg['log_raw_packet'] == True:
+                        logger.devCfg['log_raw_packet_level']('[%s] Raw packet: %s', devCfg['name'], packet )
+                    if devCfg['print_raw_packet'] == True:
+                        pprint('[{}] Raw Packet: {}'.format(devCfg['name'], packet))
                     decoded_packet = decode_eddystone(pyBState, cfg, barray[13:])
                     try:
                         if decoded_packet['sub_type'] == 'tlm':
@@ -184,8 +188,6 @@ def onPacketFound(state, conf, packet):
                                 pyBState['packets']['eddystone']['devices'][devCfg['name']]['tlm']['count'] += 1
                             pyBState['packets']['eddystone']['devices'][devCfg['name']]['tlm']['decoded'] = decoded_packet
                             logger.debug('RX Edy-tlm Packet for %s', devCfg['name'])
-                            if devCfg['log_raw_packet'] == True:
-                                logger.devCfg['log_raw_packet_level']('[%s] Raw packet: %s', devCfg['name'], packet )
                             if devCfg['report_telemetry'] == True:
                                 logger.debug('Reporting telemetry for %s', devCfg['name'])
                                 #logger.debug(decoded_packet)
