@@ -176,65 +176,70 @@ def onPacketFound(state, conf, packet):
                     pyBState['packets']['eddystone']['devices'][devCfg['name']]['count'] += 1
                 if devCfg['enabled'] == True:
                     decoded_packet = decode_eddystone(pyBState, cfg, barray[13:])
-                    if decoded_packet['sub_type'] == 'tlm':
-                        if not 'tlm' in pyBState['packets']['eddystone']['devices'][devCfg['name']]:
-                            pyBState['packets']['eddystone']['devices'][devCfg['name']]['tlm'] = {'count':1, 'decoded':{}}
-                        else:
-                            pyBState['packets']['eddystone']['devices'][devCfg['name']]['tlm']['count'] += 1
-                        pyBState['packets']['eddystone']['devices'][devCfg['name']]['tlm']['decoded'] = decoded_packet
-                        logger.debug('RX Edy-tlm Packet for %s', devCfg['name'])
-                        if devCfg['report_telemetry'] == True:
-                            logger.debug('Reporting telemetry for %s', devCfg['name'])
-                            #logger.debug(decoded_packet)
-                            if devCfg['report_telemetry_rate'] == True:
-                                logger.debug('%s.advCount %s', devCfg['name'], decoded_packet['adv_cnt'])
-                                sendstat_gauge('{}.advCount'.format(devCfg['name']),decoded_packet['adv_cnt'] )
-                            if devCfg['report_telemetry_uptime'] == True:
-                                logger.debug('%s.uptime %s', devCfg['name'], decoded_packet['sec_cnt'])
-                                sendstat_gauge('{}.uptime'.format(devCfg['name']),decoded_packet['sec_cnt'] )
-                            if devCfg['report_telemetry_voltage'] == True:
-                                logger.debug('%s.voltage %s', devCfg['name'], decoded_packet['vbatt'])
-                                sendstat_gauge('{}.voltage'.format(devCfg['name']),decoded_packet['vbatt'] )
-                            if devCfg['report_telemetry_temp'] == True:
-                                if devCfg['native_temp_unit'] != devCfg['output_temp_unit']:
-                                    if devCfg['native_temp_unit'] == 'c':
-                                        _temp = CtoF(decoded_packet['temp'])
+                    try:
+                        if decoded_packet['sub_type'] == 'tlm':
+                            if not 'tlm' in pyBState['packets']['eddystone']['devices'][devCfg['name']]:
+                                pyBState['packets']['eddystone']['devices'][devCfg['name']]['tlm'] = {'count':1, 'decoded':{}}
+                            else:
+                                pyBState['packets']['eddystone']['devices'][devCfg['name']]['tlm']['count'] += 1
+                            pyBState['packets']['eddystone']['devices'][devCfg['name']]['tlm']['decoded'] = decoded_packet
+                            logger.debug('RX Edy-tlm Packet for %s', devCfg['name'])
+                            if devCfg['report_telemetry'] == True:
+                                logger.debug('Reporting telemetry for %s', devCfg['name'])
+                                #logger.debug(decoded_packet)
+                                if devCfg['report_telemetry_rate'] == True:
+                                    logger.debug('%s.advCount %s', devCfg['name'], decoded_packet['adv_cnt'])
+                                    sendstat_gauge('{}.advCount'.format(devCfg['name']),decoded_packet['adv_cnt'] )
+                                if devCfg['report_telemetry_uptime'] == True:
+                                    logger.debug('%s.uptime %s', devCfg['name'], decoded_packet['sec_cnt'])
+                                    sendstat_gauge('{}.uptime'.format(devCfg['name']),decoded_packet['sec_cnt'] )
+                                if devCfg['report_telemetry_voltage'] == True:
+                                    logger.debug('%s.voltage %s', devCfg['name'], decoded_packet['vbatt'])
+                                    sendstat_gauge('{}.voltage'.format(devCfg['name']),decoded_packet['vbatt'] )
+                                if devCfg['report_telemetry_temp'] == True:
+                                    if devCfg['native_temp_unit'] != devCfg['output_temp_unit']:
+                                        if devCfg['native_temp_unit'] == 'c':
+                                            _temp = CtoF(decoded_packet['temp'])
+                                        else:
+                                            _temp = FtoC(decoded_packet['temp'])
+                                        logger.debug('%s converted: %s%s -> %s%s', devCfg['name'], decoded_packet['temp'], devCfg['native_temp_unit'], _temp, devCfg['output_temp_unit'])
                                     else:
-                                        _temp = FtoC(decoded_packet['temp'])
-                                    logger.debug('%s converted: %s%s -> %s%s', devCfg['name'], decoded_packet['temp'], devCfg['native_temp_unit'], _temp, devCfg['output_temp_unit'])
-                                else:
-                                    _temp = decoded_packet['temp']
-                                logger.debug('%s.temp %s', devCfg['name'], _temp)
-                                sendstat_gauge('{}.temp'.format(devCfg['name']),_temp)
-                            if devCfg['report_telemetry_bytes'] == True:
-                                logger.debug('%s.bytes %s', devCfg['name'], decoded_packet['adstruct_bytes'])
-                                sendstat_gauge('{}.bytes'.format(devCfg['name']),decoded_packet['adstruct_bytes'] )
-                        else:
-                            logger.debug('discarding telemetry for %s', devCfg['name'])
+                                        _temp = decoded_packet['temp']
+                                    logger.debug('%s.temp %s', devCfg['name'], _temp)
+                                    sendstat_gauge('{}.temp'.format(devCfg['name']),_temp)
+                                if devCfg['report_telemetry_bytes'] == True:
+                                    logger.debug('%s.bytes %s', devCfg['name'], decoded_packet['adstruct_bytes'])
+                                    sendstat_gauge('{}.bytes'.format(devCfg['name']),decoded_packet['adstruct_bytes'] )
+                            else:
+                                logger.debug('discarding telemetry for %s', devCfg['name'])
 
-                    elif decoded_packet['sub_type'] == 'uid':
-                        if not 'uid' in pyBState['packets']['eddystone']['devices'][devCfg['name']]:
-                            pyBState['packets']['eddystone']['devices'][devCfg['name']]['uid'] = {'count':1,'decoded':{}}
-                        else:
-                            pyBState['packets']['eddystone']['devices'][devCfg['name']]['uid']['count']+=1
-                        pyBState['packets']['eddystone']['devices'][devCfg['name']]['uid']['decoded'] = decoded_packet
-                        logger.debug('RX Edy-uid Packet for %s', devCfg['name'])
-                        if devCfg['report_uid_rssi'] == True:
-                            logger.debug('%s.rssi %s', devCfg['name'], decoded_packet['rssi_ref'])
-                            sendstat_gauge('{}.rssi'.format(devCfg['name']),decoded_packet['rssi_ref'] )
-                            #{'namespace': 'EDD1EBEAC04E5DEFA017', 'rssi_ref': -66, 'instance': 'DF0A6A74BFDD', 'type': 'eddystone', 'sub_type': 'uid', 'adstruct_bytes': 32}
-                        else:
-                            logger.debug('discarding uid for %s', devCfg['name'])
+                        elif decoded_packet['sub_type'] == 'uid':
+                            if not 'uid' in pyBState['packets']['eddystone']['devices'][devCfg['name']]:
+                                pyBState['packets']['eddystone']['devices'][devCfg['name']]['uid'] = {'count':1,'decoded':{}}
+                            else:
+                                pyBState['packets']['eddystone']['devices'][devCfg['name']]['uid']['count']+=1
+                            pyBState['packets']['eddystone']['devices'][devCfg['name']]['uid']['decoded'] = decoded_packet
+                            logger.debug('RX Edy-uid Packet for %s', devCfg['name'])
+                            if devCfg['report_uid_rssi'] == True:
+                                logger.debug('%s.rssi %s', devCfg['name'], decoded_packet['rssi_ref'])
+                                sendstat_gauge('{}.rssi'.format(devCfg['name']),decoded_packet['rssi_ref'] )
+                                #{'namespace': 'EDD1EBEAC04E5DEFA017', 'rssi_ref': -66, 'instance': 'DF0A6A74BFDD', 'type': 'eddystone', 'sub_type': 'uid', 'adstruct_bytes': 32}
+                            else:
+                                logger.debug('discarding uid for %s', devCfg['name'])
 
 
-                    else:
-                        if not 'unknown' in pyBState['packets']['eddystone']['devices'][devCfg['name']]:
-                            pyBState['packets']['eddystone']['devices'][devCfg['name']]['unknown'] = {'count':1,'decoded':{}}
                         else:
-                            pyBState['packets']['eddystone']['devices'][devCfg['name']]['unknown']+=1
-                        logger.warn('Unknown Eddystone packet for device {}: {}'.format(device_addr, decoded_packet))
+                            if not 'unknown' in pyBState['packets']['eddystone']['devices'][devCfg['name']]:
+                                pyBState['packets']['eddystone']['devices'][devCfg['name']]['unknown'] = {'count':1,'decoded':{}}
+                            else:
+                                pyBState['packets']['eddystone']['devices'][devCfg['name']]['unknown']+=1
+                            logger.warn('Unknown Eddystone packet for device {}: {}'.format(device_addr, decoded_packet))
 
-                    #logger.info("Decoded [{}]: {}".format(device_addr, decoded_packet))
+                        #logger.info("Decoded [{}]: {}".format(device_addr, decoded_packet))
+                    except KeyError as e:
+                        #TODO: generate a stat here.
+                        logger.error('Got error: %s while trying to evaluate packet: %s', e, decoded_packet)
+                        pprint('Error ({}) with decoded packet: {}'.format(e,decoded_packet))
                 else:
                     pyBState['packets_found']['eddystone'][devCfg['name']]['disabled']+=1
                     logger.info('beacon {} disabled in cfg. Ignoring'.format(device_addr))
