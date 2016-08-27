@@ -374,8 +374,8 @@ def main(conf=init()):
                     sendstat_counter('packets.eddystone', pyBState['packets']['eddystone']['count'], conf['Global']['scan_duration'])
                     sendstat_counter('packets.found', pyBState['packets']['found'], conf['Global']['scan_duration'])
                     sendstat_counter('packets.unknown', pyBState['packets']['unknown']['count'], conf['Global']['scan_duration'])
-                    for device in pyBState['packets']['eddystone']['devices']:
-                        logger.info('counts for %s: %s [%s telem, %s uid]', device, device['count'], device['tlm']['count'], device['uid']['count'] )
+                    for k, v in pyBState['packets']['eddystone']['devices']:
+                        logger.info('counts for %s: %s [%s telem, %s uid]', k, v['count'], v['tlm']['count'], v['uid']['count'] )
                 except KeyError:
                     logger.debug('not sending stats as we got a KeyError from the object')
                 except NameError:
