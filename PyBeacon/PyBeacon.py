@@ -239,7 +239,7 @@ def onPacketFound(state, conf, packet):
                     except KeyError as e:
                         #TODO: generate a stat here.
                         logger.error('Got error: %s while trying to evaluate packet: %s', e, decoded_packet)
-                        pprint('Error ({}) with decoded packet: {}'.format(e,decoded_packet))
+                        pprint('Error ({}) with decode: {}  Raw packet: {}'.format(e,decoded_packet,packet))
                 else:
                     pyBState['packets_found']['eddystone'][devCfg['name']]['disabled']+=1
                     logger.info('beacon {} disabled in cfg. Ignoring'.format(device_addr))
@@ -360,7 +360,7 @@ def main(conf=init()):
         if args.terminate:
             stopAdvertising()
         elif args.one:
-            scan(3)
+            scan(pyBState, init(), 3)
         elif args.scan:
             while True:
                 if conf['Global']['maintain_statefile'] == True:
@@ -371,10 +371,10 @@ def main(conf=init()):
                         statefile.write(yaml.dump(pyBState))
                         statefile.close()
                 try:
-                    sendstat_counter(PyBState['packets']['eddystone'], pyBState['packets']['eddystone']['count'], conf['Global']['scan_duration'])
-                    sendstat_counter(PyBState['packets']['found'], pyBState['packets']['found'], conf['Global']['scan_duration'])
-                    sendstat_counter(PyBState['packets']['unknown'], pyBState['packets']['unknown']['count'], conf['Global']['scan_duration'])
-                    for device in pyBState['packets']['eddystone']['devices'].each:
+                    sendstat_counter('packets.eddystone', pyBState['packets']['eddystone']['count'], conf['Global']['scan_duration'])
+                    sendstat_counter('packets.found', pyBState['packets']['found'], conf['Global']['scan_duration'])
+                    sendstat_counter('packets.unknown', pyBState['packets']['unknown']['count'], conf['Global']['scan_duration'])
+                    for device in pyBState['packets']['eddystone']['devices']:
                         logger.info('counts for %s: %s [%s telem, %s uid]', device, device['count'], device['tlm']['count'], device['uid']['count'] )
                 except KeyError:
                     logger.debug('not sending stats as we got a KeyError from the object')
