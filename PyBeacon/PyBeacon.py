@@ -176,7 +176,7 @@ def onPacketFound(state, conf, packet):
                     pyBState['packets']['eddystone']['devices'][devCfg['name']]['count'] += 1
                 if devCfg['enabled'] == True:
                     if devCfg['log_raw_packet'] == True:
-                        logger.devCfg['log_raw_packet_level']('[%s] Raw packet: %s', devCfg['name'], packet )
+                        logger.info('[%s] Raw packet: %s', devCfg['name'], packet )
                     if devCfg['print_raw_packet'] == True:
                         pprint('[{}] Raw Packet: {}'.format(devCfg['name'], packet))
                     decoded_packet = decode_eddystone(pyBState, cfg, barray[13:])

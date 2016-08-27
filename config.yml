@@ -36,7 +36,6 @@ Beacons:
     default:
       enabled: false
       log_raw_packet: false
-      log_raw_packet_level: 'debug'
       print_raw_packet: false
       report_telemetry: false
       report_telemetry_rate: true
