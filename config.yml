@@ -37,6 +37,8 @@ Beacons:
       enabled: false
       log_raw_packet: false
       print_raw_packet: false
+      log_decoded_packet: false
+      print_decoded_packet: false
       report_telemetry: false
       report_telemetry_rate: true
       report_telemetry_uptime: false

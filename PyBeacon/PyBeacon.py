@@ -180,6 +180,10 @@ def onPacketFound(state, conf, packet):
                     if devCfg['print_raw_packet'] == True:
                         pprint('[{}] Raw Packet: {}'.format(devCfg['name'], packet))
                     decoded_packet = decode_eddystone(pyBState, cfg, barray[13:])
+                    if devCfg['print_decoded_packet'] == True:
+                        pprint('[{}] Decoded Packet: {}'.format(devCfg['name'], decoded_packet))
+                    if devCfg['log_decoded_packet'] == True:
+                        logger.info('[%s] decoded packet: %s', devCfg['name'], decoded_packet )
                     try:
                         if decoded_packet['sub_type'] == 'tlm':
                             if not 'tlm' in pyBState['packets']['eddystone']['devices'][devCfg['name']]:
