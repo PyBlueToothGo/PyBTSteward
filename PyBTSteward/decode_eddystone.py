@@ -120,7 +120,7 @@ def decode_eddystone(state, config, ad_struct):
                     logger.debug('interpolating Eddystone UID instance from string')
                     ret['instance'] = ''.join('%02X' % ord(c) for c in ei.instance)
                 ret['rssi_ref'] = ei.rssi_ref
-                ret['rssi_fudge'] = int(ad_struct[len(ad_struct)])
+                ret['rssi_fudge'] = str(ad_struct[len(ad_struct)])
 
             # Is this a URL sub type?
             if ec.sub_type == 0x10:
