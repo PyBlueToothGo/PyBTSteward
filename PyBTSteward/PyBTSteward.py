@@ -241,11 +241,12 @@ def onPacketFound(state, conf, packet):
 
 
                         else:
+                            #unknown eddystone packettype for known device
                             if not 'unknown' in pyBState['packets']['eddystone']['devices'][devCfg['name']]:
                                 pyBState['packets']['eddystone']['devices'][devCfg['name']]['unknown'] = {'count':1,'decoded':{}}
                             else:
                                 pyBState['packets']['eddystone']['devices'][devCfg['name']]['unknown']+=1
-                            logger.warn('Unknown Eddystone packet for device {}: {}'.format(device_addr, decoded_packet))
+                            logger.warn('Unknown Eddystone packet for device {} {}: {}'.format(devCfg['name'], device_addr, decoded_packet))
 
                         #logger.info("Decoded [{}]: {}".format(device_addr, decoded_packet))
                     except KeyError as e:
@@ -256,8 +257,11 @@ def onPacketFound(state, conf, packet):
                     pyBState['packets']['eddystone'][devCfg['name']]['disabled']+=1
                     logger.info('beacon {} disabled in cfg. Ignoring'.format(device_addr))
             else:
-                pyBState['packets']['eddystone']['devices']['unknown']
-                logger.info('unknown eddy beacon found %s', device_addr)
+                if not 'unknown' in pyBState['packets']['eddystone']['devices']:
+                    pyBState['packets']['eddystone']['devices']['unknown'] = {'count':1,'decoded':{}}
+                else:
+                    pyBState['packets']['eddystone']['devices']['unknown']['count']+=1
+                    logger.info('unknown eddy beacon found %s', device_addr)
         else:
             logger.warn('Unknown Device address Type: %s (byte[6])',data[6])
 
