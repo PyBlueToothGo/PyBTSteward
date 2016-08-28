@@ -106,7 +106,7 @@ def decode_eddystone(state, config, ad_struct):
                 ret['sub_type'] = 'uid'
                 # Decode Eddystone UID data (without reserved bytes)
                 EddystoneUID = namedtuple('EddystoneUID', 'rssi_ref namespace instance')
-                ei = EddystoneUID._make(struct.unpack('>b10s6s', ad_struct[13:30]))
+                ei = EddystoneUID._make(struct.unpack('>b10s6', ad_struct[13:30]))
                 # Fill in the return structure with the data we extracted
                 logger.debug('EddyStone UID: {}'.format(ei))
                 try:
@@ -120,7 +120,9 @@ def decode_eddystone(state, config, ad_struct):
                     logger.debug('interpolating Eddystone UID instance from string')
                     ret['instance'] = ''.join('%02X' % ord(c) for c in ei.instance)
                 ret['rssi_ref'] = ei.rssi_ref
-                ret['rssi_fudge'] = str(ad_struct[len(ad_struct)])
+# I think there's something to the last packet here, but not gonna fuck with it now.
+#                if ec.eddy_len == 0x17:
+#                    ret['rssi_fudge'] = str(ad_struct[len(ad_struct)])
 
             # Is this a URL sub type?
             if ec.sub_type == 0x10:

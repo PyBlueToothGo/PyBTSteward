@@ -234,10 +234,10 @@ def onPacketFound(state, conf, packet):
                                 #{'namespace': 'EDD1EBEAC04E5DEFA017', 'rssi_ref': -66, 'instance': 'DF0A6A74BFDD', 'type': 'eddystone', 'sub_type': 'uid', 'adstruct_bytes': 32}
                             else:
                                 logger.debug('discarding uid for %s', devCfg['name'])
-                            try:
-                                pprint("{}: Rssi Guestimation: Ref:{} lastbyte: {}".format(devCfg['name'],decoded_packet['rssi_ref'],decoded_packet['rssi_fudge']))
-                            except KeyError as e:
-                                logger.debug('no guestimate rssi')
+#                            try:
+#                                pprint("{}: Rssi Guestimation: Ref:{} lastbyte: {}".format(devCfg['name'],decoded_packet['rssi_ref'],decoded_packet['rssi_fudge']))
+#                            except KeyError as e:
+#                                logger.debug('no guestimate rssi')
 
 
                         else:
