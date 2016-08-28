@@ -9,13 +9,13 @@ import subprocess
 import sys
 import time
 from collections import namedtuple
-import PyBeacon.wpl_cfg_parser
-import PyBeacon.wpl_log
-import PyBeacon.wpl_stats
+import PyBTSteward.wpl_cfg_parser
+import PyBTSteward.wpl_log
+import PyBTSteward.wpl_stats
 import bluetooth._bluetooth as bluez
 import uuid
 from . import __version__
-from PyBeacon.wpl_cfg_parser import wpl_cfg
+from PyBTSteward.wpl_cfg_parser import wpl_cfg
 logger = logging.getLogger(__name__)
 
 def decode_iBeacon(ad_struct):

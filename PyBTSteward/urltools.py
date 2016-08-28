@@ -30,19 +30,19 @@ import struct
 import subprocess
 import sys
 import time
-import PyBeacon.wpl_cfg_parser
-import PyBeacon.wpl_log
-import PyBeacon.wpl_stats
+import PyBTSteward.wpl_cfg_parser
+import PyBTSteward.wpl_log
+import PyBTSteward.wpl_stats
 import bluetooth._bluetooth as bluez
 from collections import namedtuple
 import uuid
 from . import __version__
 from pprint import pprint
-from PyBeacon.wpl_cfg_parser import wpl_cfg
-from PyBeacon.wpl_stats import sendstat_gauge
-from PyBeacon.decode_eddystone import decode_eddystone
-from PyBeacon.decode_iBeacon import decode_iBeacon
-from PyBeacon.converters import ByteToHex, CtoF, FtoC, HexToByte
+from PyBTSteward.wpl_cfg_parser import wpl_cfg
+from PyBTSteward.wpl_stats import sendstat_gauge
+from PyBTSteward.decode_eddystone import decode_eddystone
+from PyBTSteward.decode_iBeacon import decode_iBeacon
+from PyBTSteward.converters import ByteToHex, CtoF, FtoC, HexToByte
 logger = logging.getLogger(__name__)
 
 def encodeurl(url):

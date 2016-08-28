@@ -1,5 +1,22 @@
-# PyBeacon
-Python script for scanning and advertising urls over [Eddystone-URL](https://github.com/google/eddystone/tree/master/eddystone-url/implementations/PyBeacon).
+# PyBTSteward
+This tool started life as a python script for scanning and advertising
+urls over [Eddystone-URL](https://github.com/nirmankarta/PyBeacon).
+
+I needed a tool to be able to use a Raspberry Pi 3 pull telemetry data from bluetooth devices, and this
+seemed like a phenomenal starting point.
+
+I subsequently found Patrick Van Oosterwijck's [py-decode-beacon](https://github.com/xorbit/py-decode-beacon)
+which also did a lot of what I wanted, but not all.
+
+I'd like to thank these authors, as well as the authors and contributors to the
+myriad opensource projects I'm standing on the shoulders of to make this tool.
+It is not my intent to take credit for any of their work. Merely to adapt and
+continue to share.
+
+I've also recompiled the Bluez packages for Raspbian Jessie to utilize the
+latest available version. I've shared them on artifactory.
+
+[You can find that repository here](https://bintray.com/wolfspyre/rpi-bluez/bluetooth)
 
 ## Requirements
 
@@ -9,14 +26,15 @@ Python script for scanning and advertising urls over [Eddystone-URL](https://git
 
 ## Installation
 
-    sudo pip install PyBeacon
+  - [Via Chef](chef/pybtsteward/README.md)
+  - [One-Off](INSTALL.md)
 
 ## Upgrade
 
-    sudo pip install PyBeacon --upgrade
+    sudo pip install PyBTSteward --upgrade
 
 ## Usage
-	PyBeacon [-h] [-u [URL]] [-s] [-t] [-o] [-v] [-V]
+	PyBTSteward [-h] [-u [URL]] [-s] [-t] [-o] [-v] [-V]
 
 	optional arguments:
 		-h, --help            show this help message and exit
@@ -24,5 +42,5 @@ Python script for scanning and advertising urls over [Eddystone-URL](https://git
 		-s, --scan            Scan for URLs.
 		-t, --terminate       Stop advertising URL.
 		-o, --one             Scan one URL only.
-		-v, --version         Version of PyBeacon.
+		-v, --version         Version of PyBTSteward.
 		-V, --Verbose         Print lots of debug output.

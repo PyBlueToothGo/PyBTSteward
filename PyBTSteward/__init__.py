@@ -1,4 +1,4 @@
-__title__ = 'PyBeacon'
+__title__ = 'PyBTSteward'
 __version__ = '1.0.0'
 __build__ = 0x016
 __author__ = 'Nirmankarta'

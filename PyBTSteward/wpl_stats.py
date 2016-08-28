@@ -9,8 +9,8 @@ Interact with Statsd
 '''
 import logging
 import statsd
-import PyBeacon.wpl_log
-from PyBeacon.wpl_cfg_parser import wpl_cfg
+import PyBTSteward.wpl_log
+from PyBTSteward.wpl_cfg_parser import wpl_cfg
 from statsd import StatsClient, TCPStatsClient
 
 

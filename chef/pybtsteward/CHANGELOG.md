@@ -1,11 +1,11 @@
-pybeacon CHANGELOG
+PyBTSteward CHANGELOG
 ==================
 
-This file is used to list changes made in each version of the pybeacon cookbook.
+This file is used to list changes made in each version of the PyBTSteward cookbook.
 
 0.1.0
 -----
-- [your_name] - Initial release of pybeacon
+- [your_name] - Initial release of PyBTSteward
 
 - - -
 Check the [Markdown Syntax Guide](http://daringfireball.net/projects/markdown/syntax) for help with Markdown.

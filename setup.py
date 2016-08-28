@@ -1,27 +1,27 @@
 import re
 from setuptools import setup
 
-with open('PyBeacon/__init__.py', 'r') as fd:
+with open('PyBTSteward/__init__.py', 'r') as fd:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', fd.read(), re.MULTILINE).group(1)
 
 if not version:
     raise RuntimeError('Cannot find version information')
 
 setup(
-    name = 'PyBeacon',
+    name = 'PyBTSteward',
     version = version,
-    packages = ['PyBeacon'],
+    packages = ['PyBTSteward'],
     entry_points = {
-        "console_scripts": ['PyBeacon = PyBeacon.PyBeacon:main']
+        "console_scripts": ['PyBTSteward = PyBTSteward.PyBTSteward:main']
     },
     
     description = 'Python script for scanning and advertising urls over Eddystone-URL.',
 
     long_description = 'Python script for scanning and advertising urls over Eddystone-URL.',
 
-    url = 'https://github.com/nirmankarta/PyBeacon',
+    url = 'https://github.com/nirmankarta/PyBTSteward',
 
-    download_url = 'https://github.com/nirmankarta/PyBeacon/archive/master.zip',
+    download_url = 'https://github.com/nirmankarta/PyBTSteward/archive/master.zip',
 
     author = 'Nirmankarta',
 

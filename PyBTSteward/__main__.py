@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
 
-from PyBeacon import main
+from PyBTSteward import main
 main()

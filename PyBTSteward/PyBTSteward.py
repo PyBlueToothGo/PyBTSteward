@@ -24,9 +24,9 @@ https://github.com/wolfspyre/py-decode-beacon
 import argparse
 import logging
 import os
-import PyBeacon.wpl_cfg_parser
-import PyBeacon.wpl_log
-import PyBeacon.wpl_stats
+import PyBTSteward.wpl_cfg_parser
+import PyBTSteward.wpl_log
+import PyBTSteward.wpl_stats
 import re
 import signal
 import struct
@@ -39,14 +39,14 @@ import bluetooth._bluetooth as bluez
 from collections import namedtuple
 from . import __version__
 from pprint import pprint
-from PyBeacon.wpl_cfg_parser import wpl_cfg
-from PyBeacon.wpl_stats import sendstat_gauge, sendstat_counter
-from PyBeacon.decode_eddystone import decode_eddystone
-from PyBeacon.decode_iBeacon import decode_iBeacon
-from PyBeacon.converters import ByteToHex, CtoF, FtoC, HexToByte
-from PyBeacon.urltools import encodeurl, encodeMessage, decodeUrl, resolveUrl
+from PyBTSteward.wpl_cfg_parser import wpl_cfg
+from PyBTSteward.wpl_stats import sendstat_gauge, sendstat_counter
+from PyBTSteward.decode_eddystone import decode_eddystone
+from PyBTSteward.decode_iBeacon import decode_iBeacon
+from PyBTSteward.converters import ByteToHex, CtoF, FtoC, HexToByte
+from PyBTSteward.urltools import encodeurl, encodeMessage, decodeUrl, resolveUrl
 
-application_name = 'PyBeacon'
+application_name = 'PyBTSteward'
 version = __version__ + 'beta'
 
 def init():

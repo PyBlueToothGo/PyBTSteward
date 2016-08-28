@@ -5,7 +5,7 @@ Global:
   maintain_statefile: true
   statefile: '/tmp/statefile.txt'
 Logging:
-  logfile: '/var/log/pybeacon.log'
+  logfile: '/var/log/pybtsteward.log'
   loglevel: 'INFO'
   mark: true
   mark_count: 12
@@ -20,7 +20,7 @@ Reporting:
     enabletcp: false
     host:    '127.0.0.1'
     port:    8125
-    prefix:  'pybeacon'
+    prefix:  'BTsteward'
   events:
       default:
         tick: false
@@ -47,6 +47,7 @@ Beacons:
       report_telemetry_bytes: false
       report_uid_rate: false
       report_uid_rssi: true
+      uid_rssi_offset: -41
       native_temp_unit: 'c'
       output_temp_unit: 'f'
     devices:

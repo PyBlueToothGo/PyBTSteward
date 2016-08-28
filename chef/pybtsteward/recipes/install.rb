@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: pybeacon
+# Cookbook Name:: pybtsteward
 # Recipe:: default
 #
 # Copyright 2016, YOUR_COMPANY_NAME
