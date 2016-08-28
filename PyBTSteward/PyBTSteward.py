@@ -196,7 +196,7 @@ def onPacketFound(state, conf, packet):
                                 logger.debug('Reporting telemetry for %s', devCfg['name'])
                                 #logger.debug(decoded_packet)
                                 if devCfg['report_telemetry_rate'] == True:
-                                    logger.debug('%s.advCount %s', devCfg['name'], decoded_packet['adv_cnt'])
+                                    logger.debug('%s.advCount', devCfg['name'], decoded_packet['adv_cnt'])
                                     sendstat_gauge('{}.advCount'.format(devCfg['name']),decoded_packet['adv_cnt'] )
                                 if devCfg['report_telemetry_uptime'] == True:
                                     logger.debug('%s.uptime %s', devCfg['name'], decoded_packet['sec_cnt'])
@@ -234,6 +234,10 @@ def onPacketFound(state, conf, packet):
                                 #{'namespace': 'EDD1EBEAC04E5DEFA017', 'rssi_ref': -66, 'instance': 'DF0A6A74BFDD', 'type': 'eddystone', 'sub_type': 'uid', 'adstruct_bytes': 32}
                             else:
                                 logger.debug('discarding uid for %s', devCfg['name'])
+                            try:
+                                pprint("{}: Rssi Guestimation: Ref:{} lastbyte: {}".format(devCfg['name'],decoded_packet['rssi_ref'],decoded_packet['rssi_fudge']))
+                            except KeyError as e:
+                                logger.debug('no guestimate rssi')
 
 
                         else:
@@ -249,10 +253,10 @@ def onPacketFound(state, conf, packet):
                         logger.error('Got error: %s while trying to evaluate packet: %s', e, decoded_packet)
                         pprint('Error ({}) with decode: {}  Raw packet: {}'.format(e,decoded_packet,packet))
                 else:
-                    pyBState['packets_found']['eddystone'][devCfg['name']]['disabled']+=1
+                    pyBState['packets']['eddystone'][devCfg['name']]['disabled']+=1
                     logger.info('beacon {} disabled in cfg. Ignoring'.format(device_addr))
             else:
-                pyBState['packets_found']['eddystone']['unknown_beacon']
+                pyBState['packets']['eddystone']['devices']['unknown']
                 logger.info('unknown eddy beacon found %s', device_addr)
         else:
             logger.warn('Unknown Device address Type: %s (byte[6])',data[6])

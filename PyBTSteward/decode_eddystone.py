@@ -120,6 +120,7 @@ def decode_eddystone(state, config, ad_struct):
                     logger.debug('interpolating Eddystone UID instance from string')
                     ret['instance'] = ''.join('%02X' % ord(c) for c in ei.instance)
                 ret['rssi_ref'] = ei.rssi_ref
+                ret['rssi_fudge'] = int(ad_struct[len(ad_struct)])
 
             # Is this a URL sub type?
             if ec.sub_type == 0x10:
@@ -128,7 +129,8 @@ def decode_eddystone(state, config, ad_struct):
                 EddyStoneURL = namedtuple('EddystoneURL', 'rssi_ref url_scheme')
                 eu = EddyStoneURL._make(struct.unpack('>bB', ad_struct[13:20]))
                 # Fill in the return structure with extracted data and init the URL
-                ret['rssi_ref'] = eu.rssi_ref - 41
+                ret['rssi_ref'] = eu.rssi_ref #- 41
+                ret['rssi_fudge'] =
                 ret['url'] = ['http://www.', 'https://www.', 'http://', 'https://'] \
                       [eu.url_scheme & 0x03]
                 # Go through the remaining bytes to build the URL
