@@ -162,8 +162,8 @@ def decode_eddystone(state, config, ad_struct):
                 ret['tlm_version'] = et.tlm_version
                 # Fill the return structure with data if version 0
                 if et.tlm_version == 0x00:
-                    ret['vbatt'] = et.vbatt / 1000.0
-                    ret['temp'] = et.temp / 256.0
+                    ret['vbatt'] = et.vbatt / 1000.00
+                    ret['temp'] = et.temp / 256.00
                     ret['adv_cnt'] = et.adv_cnt
                     ret['sec_cnt'] = et.sec_cnt / 10.0
                 logger.debug('EddyStone TLM: {}'.format(et))

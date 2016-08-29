@@ -205,11 +205,16 @@ def onPacketFound(state, conf, packet):
                                     logger.debug('%s.voltage %s', devCfg['name'], decoded_packet['vbatt'])
                                     sendstat_gauge('{}.voltage'.format(devCfg['name']),decoded_packet['vbatt'] )
                                 if devCfg['report_telemetry_temp'] == True:
+                                    if devCfg['temp_offset'] != 0:
+                                        _temp = '{:02f}'.format(decoded_packet['temp']+devCfg['temp_offset'])
+                                        logger.debug('%s: adjusting temperature by %s to %s as requested by config', devCfg['name'], devCfg['temp_offset'], _temp)
+                                    else:
+                                        _temp = decoded_packet['temp']
                                     if devCfg['native_temp_unit'] != devCfg['output_temp_unit']:
                                         if devCfg['native_temp_unit'] == 'c':
-                                            _temp = CtoF(decoded_packet['temp'])
+                                            _temp = CtoF(_temp)
                                         else:
-                                            _temp = FtoC(decoded_packet['temp'])
+                                            _temp = FtoC(_temp)
                                         logger.debug('%s converted: %s%s -> %s%s', devCfg['name'], decoded_packet['temp'], devCfg['native_temp_unit'], _temp, devCfg['output_temp_unit'])
                                     else:
                                         _temp = decoded_packet['temp']

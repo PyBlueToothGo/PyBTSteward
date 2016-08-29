@@ -47,6 +47,7 @@ Beacons:
       report_telemetry_bytes: false
       report_uid_rate: false
       report_uid_rssi: true
+      temp_offset: 0
       uid_rssi_offset: -41
       native_temp_unit: 'c'
       output_temp_unit: 'f'

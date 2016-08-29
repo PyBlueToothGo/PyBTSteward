@@ -24,7 +24,7 @@ if [[ `grep -q 'hcitool' /proc/[[:digit:]]*/cmdline; echo $?` > 0 ]]; then
     echo "Hcitool commands still running. killing them."
     sudo killall hcitool
 fi
->/var/log/PyBTSteward.log
+>/var/log/pybtsteward.log
 git checkout foo >>${LOG} $2>&1 && git reset --hard >>${LOG} $2>&1 &&
 git branch -D master
 git fetch ; git checkout master
