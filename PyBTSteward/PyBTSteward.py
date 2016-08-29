@@ -392,9 +392,9 @@ def main(conf=init()):
                     sendstat_counter('packets.unknown', pyBState['packets']['unknown']['count'], conf['Global']['scan_duration'])
                     for k, v in pyBState['packets']['eddystone']['devices'].items():
                         logger.debug('counts for %s: %s [%s telem, %s uid]', k, v['count'], v['tlm']['count'], v['uid']['count'] )
-                        sendstat_gauge('packets.eddystone.{}.count', v['count'], conf['Global']['scan_duration'])
-                        sendstat_gauge('packets.eddystone.{}.telemetry', v['tlm']['count'], conf['Global']['scan_duration'])
-                        sendstat_gauge('packets.eddystone.{}.uid', v['uid']['count'], conf['Global']['scan_duration'])
+                        sendstat_gauge('packets.eddystone.{}.count'.format(k), v['count'], conf['Global']['scan_duration'])
+                        sendstat_gauge('packets.eddystone.{}.telemetry'.format(k), v['tlm']['count'], conf['Global']['scan_duration'])
+                        sendstat_gauge('packets.eddystone.{}.uid'.format(k), v['uid']['count'], conf['Global']['scan_duration'])
                 except KeyError:
                     logger.debug('not sending stats as we got a KeyError from the object')
                 except NameError:
