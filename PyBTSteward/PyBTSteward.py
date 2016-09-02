@@ -302,13 +302,13 @@ def scan(state, config, duration=None):
     if config['Logging']['list_devices_in_cfg'] == True:
         for bcn in config['Beacons']['eddystone']['devices']:
             logger.info('configured beacon: {}'.format(bcn))
-    subprocess.call("sudo hciconfig hci0 reset", shell=True, stdout=DEVNULL)
+    subprocess.call("sudo /bin/hciconfig hci0 reset", shell=True, stdout=DEVNULL)
 
     lescan = subprocess.Popen(
-        ["sudo", "-n", "hcitool", "lescan", "--duplicates"], stdout=DEVNULL)
+        ["sudo", "-n", "/usr/bin/hcitool", "lescan", "--duplicates"], stdout=DEVNULL)
 
     dump = subprocess.Popen(
-        ["sudo", "-n", "hcidump", "--raw"], stdout=subprocess.PIPE)
+        ["sudo", "-n", "/usr/bin/hcidump", "--raw"], stdout=subprocess.PIPE)
 
     packet = None
     try:
@@ -325,13 +325,15 @@ def scan(state, config, duration=None):
                 if packet: packet += " " + line.strip()
 
             if duration and time.time() - startTime > duration:
+                subprocess.call(["sudo", "/bin/kill", str(dump.pid), "-s", "SIGKILL"])
+                subprocess.call(["sudo", "-n", "/bin/kill", str(lescan.pid), "-s", "SIGKILL"])
                 break
 
     except KeyboardInterrupt:
         pass
 
-    subprocess.call(["sudo", "kill", str(dump.pid), "-s", "SIGINT"])
-    subprocess.call(["sudo", "-n", "kill", str(lescan.pid), "-s", "SIGINT"])
+    subprocess.call(["sudo", "/bin/kill", str(dump.pid), "-s", "SIGKILL"])
+    subprocess.call(["sudo", "-n", "/bin/kill", str(lescan.pid), "-s", "SIGKILL"])
     #TODO: make this whole process better.
     # grep -q 'hcidump' /proc/[[:digit:]]*/cmdline; echo $?
     # will give 0/1 if running.
@@ -385,7 +387,7 @@ def main(conf=init()):
         elif args.scan:
             while True:
                 if conf['Global']['maintain_statefile'] == True:
-                    with open(conf['Global']['statefile'], 'a+') as statefile:
+                    with open(conf['Global']['statefile'], 'w+') as statefile:
                         statefile.seek(0)
                         statefile.write(yaml.dump(conf))
                         statefile.write('##########')

@@ -1,4 +1,7 @@
 # PyBTSteward
+A tool to report telemetry and more from bluetooth devices.
+Currently it reports telemetry data to statsd. But there are many future plans in store.
+
 This tool started life as a python script for scanning and advertising
 urls over [Eddystone-URL](https://github.com/nirmankarta/PyBeacon).
 
@@ -16,7 +19,7 @@ continue to share.
 I've also recompiled the Bluez packages for Raspbian Jessie to utilize the
 latest available version. I've shared them on artifactory.
 
-[You can find that repository here](https://bintray.com/wolfspyre/rpi-bluez/bluetooth)
+[You can find that repository here](https://bintray.com/wolfspyre/rpiBluez/bluetooth)
 
 ## Requirements
 
@@ -29,12 +32,17 @@ latest available version. I've shared them on artifactory.
   - [Via Chef](chef/pybtsteward/README.md)
   - [One-Off](INSTALL.md)
 
+## Configuration
+
+  - Most of the configuration is outlined
+
+
 ## Upgrade
 
     sudo pip install PyBTSteward --upgrade
 
 ## Usage
-	PyBTSteward [-h] [-u [URL]] [-s] [-t] [-o] [-v] [-V]
+	PyBTSteward [-s] [-t] [-o] [-v] [-V]
 
 	optional arguments:
 		-h, --help            show this help message and exit
