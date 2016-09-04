@@ -302,13 +302,17 @@ def scan(state, config, duration=None):
     if config['Logging']['list_devices_in_cfg'] == True:
         for bcn in config['Beacons']['eddystone']['devices']:
             logger.info('configured beacon: {}'.format(bcn))
+    logger.info("Resetting hci0...")
     subprocess.call("sudo /bin/hciconfig hci0 reset", shell=True, stdout=DEVNULL)
 
     lescan = subprocess.Popen(
         ["sudo", "-n", "/usr/bin/hcitool", "lescan", "--duplicates"], stdout=DEVNULL)
+    logger.info("Started hcitool...[%s]", lescan.pid)
+
 
     dump = subprocess.Popen(
         ["sudo", "-n", "/usr/bin/hcidump", "--raw"], stdout=subprocess.PIPE)
+    logger.info("Started hcidump...[%s]", dump.pid)
 
     packet = None
     try:
@@ -325,13 +329,17 @@ def scan(state, config, duration=None):
                 if packet: packet += " " + line.strip()
 
             if duration and time.time() - startTime > duration:
+                subprocess.call(["sudo", "/bin/kill", str(dump.pid), "-s", "SIGTERM"])
+                subprocess.call(["sudo", "-n", "/bin/kill", str(lescan.pid), "-s", "SIGTERM"])
+
                 subprocess.call(["sudo", "/bin/kill", str(dump.pid), "-s", "SIGKILL"])
                 subprocess.call(["sudo", "-n", "/bin/kill", str(lescan.pid), "-s", "SIGKILL"])
                 break
 
     except KeyboardInterrupt:
         pass
-
+    subprocess.call(["sudo", "/bin/kill", str(dump.pid), "-s", "SIGTERM"])
+    subprocess.call(["sudo", "-n", "/bin/kill", str(lescan.pid), "-s", "SIGTERM"])
     subprocess.call(["sudo", "/bin/kill", str(dump.pid), "-s", "SIGKILL"])
     subprocess.call(["sudo", "-n", "/bin/kill", str(lescan.pid), "-s", "SIGKILL"])
     #TODO: make this whole process better.
