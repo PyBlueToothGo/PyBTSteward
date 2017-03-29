@@ -1,0 +1,15 @@
+#deploy this to /lib/systemd/system/pyBTSteward.service
+[Unit]
+Description=PyBTSteward startup.
+After=network.target
+
+[Service]
+User=pybtsteward
+Group=pybtsteward
+WorkingDirectory=/usr/local/PyBTSteward/PyBTSteward
+Environment=VIRTUAL_ENV="/usr/local/PyBTSteward/PyBTSteward"
+Environment=PATH="/usr/local/PyBTSteward/PyBTSteward/bin:/bin:/usr/bin:/usr/local/bin:/sbin:/usr/sbin:/usr/local/sbin:\$PATH"
+ExecStart=/bin/bash -c 'source /usr/local/PyBTSteward/PyBTSteward/bin/activate ; /usr/local/PyBTSteward/PyBTSteward/bin/PyBTSteward -s'
+Restart=always
+[Install]
+WantedBy=multi-user.target

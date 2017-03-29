@@ -196,13 +196,13 @@ def onPacketFound(state, conf, packet):
                                 logger.debug('Reporting telemetry for %s', devCfg['name'])
                                 #logger.debug(decoded_packet)
                                 if devCfg['report_telemetry_rate'] == True:
-                                    logger.debug('%s.advCount', devCfg['name'], decoded_packet['adv_cnt'])
+                                    logger.debug('%s.advCount: %s', devCfg['name'], decoded_packet['adv_cnt'])
                                     sendstat_gauge('{}.advCount'.format(devCfg['name']),decoded_packet['adv_cnt'] )
                                 if devCfg['report_telemetry_uptime'] == True:
-                                    logger.debug('%s.uptime %s', devCfg['name'], decoded_packet['sec_cnt'])
+                                    logger.debug('%s.uptime: %s', devCfg['name'], decoded_packet['sec_cnt'])
                                     sendstat_gauge('{}.uptime'.format(devCfg['name']),decoded_packet['sec_cnt'] )
                                 if devCfg['report_telemetry_voltage'] == True:
-                                    logger.debug('%s.voltage %s', devCfg['name'], decoded_packet['vbatt'])
+                                    logger.debug('%s.voltage: %s', devCfg['name'], decoded_packet['vbatt'])
                                     sendstat_gauge('{}.voltage'.format(devCfg['name']),decoded_packet['vbatt'] )
                                 if devCfg['report_telemetry_temp'] == True:
                                     if devCfg['temp_offset'] != 0:
