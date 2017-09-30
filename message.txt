@@ -1,0 +1,5 @@
+PyBTSteward
+
+A tool to report telemetry and more from bluetooth devices. Currently it reports telemetry data to statsd. But there are many future plans in store.
+
+This tool started life as a python script for scanning and advertising urls over Eddystone-URL.
